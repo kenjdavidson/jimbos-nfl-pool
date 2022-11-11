@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Grab title from the page data and dump it here -->
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="bg-white prose prose-headings mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2"> 
+    <div class="border-b border-gray-200 pt-8 pb-6">
+      {{ content | safe }}
+    </div>
+  </main>
+</body>
+</html>

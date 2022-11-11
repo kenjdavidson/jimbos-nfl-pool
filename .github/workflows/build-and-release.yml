@@ -1,0 +1,6 @@
+name: Build and Release
+run-name: ${{ github.actor }} is releasing new spread pool results
+on:
+  - push
+  - cron
+jobs:
