@@ -1,13 +1,14 @@
 name: Build and Release
 run-name: ${{ github.actor }} is releasing new spread pool results
 on:
-  workflow_dispatch
+  workflow_dispatch:    
   push:
-    branches:
+    branches: 
       - main
   schedule:
-    - cron: '45 23 * * 5,1'
-    - cron: '45 12,16,19,23 * * 0'
+    - cron: '45 4 * * 5,2' # Thursday/Monday night game 11:45pm
+    - cron: '45 15/19/23 * * 0' # Sunday games 11:45am, 3:45pm, 7:45pm
+    - cron: '45 4 * * 1' # Sunday game 11:45pm
 jobs:
   build-and-release:
     runs-on: ubuntu-latest    
