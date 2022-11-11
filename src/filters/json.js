@@ -1,4 +1,4 @@
 module.exports = {
-    toJson: (value) => JSON.stringify(value),
-    fromJson: (value) => JSON.parse(value)
+  toJson: (value) => JSON.stringify(value),
+  fromJson: (value) => JSON.parse(value),
 };

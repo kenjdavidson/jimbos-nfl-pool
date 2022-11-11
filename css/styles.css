@@ -3,19 +3,19 @@
 @tailwind utilities;
 
 @layer components {
-    .spread-covered {
-        @apply font-bold;
-    }
+  .spread-covered {
+    @apply font-bold;
+  }
 
-    .spread-not-covered {
-        @apply text-red-500 font-light;
-    }
+  .spread-not-covered {
+    @apply text-red-500 font-light;
+  }
 
-    .spread-winner {
-        @apply font-bold bg-green-300;
-    }
+  .spread-winner {
+    @apply font-bold bg-green-300;
+  }
 
-    .spread-not-winner {
-        @apply text-red-500;
-    }
+  .spread-not-winner {
+    @apply text-red-500;
+  }
 }
