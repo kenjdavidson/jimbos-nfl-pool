@@ -9,7 +9,7 @@
     "dev:11ty": "eleventy --serve --watch",
     "dev:css": "tailwindcss -i ./css/styles.css -o ./_site/styles.css --watch",
     "build": "NODE_ENV=production npm-run-all clean build:11ty build:css",
-    "build:11ty": "eleventy",
+    "build:11ty": "eleventy --pathprefix=jimbos-nfl-pool",
     "build:css": "tailwindcss -i ./css/styles.css -o ./_site/styles.css --minify",
     "prettier": "prettier --write -c '{content,css,src}/**/*.{js,json,css,njk}'",
     "prettier:check": "prettier --check -c '{content,css,src}//**/*.{js,json,css,njk}'"

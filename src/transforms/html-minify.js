@@ -6,8 +6,7 @@ module.exports = function(content, outputPath) {
             useShortDoctype: true,
             removeComments: true,
             collapseInlineTagWhitespace: true,
-            collapseBooleanAttributes: true,  
-            collapseWhitespace: true
+            collapseBooleanAttributes: true,
         });
 
         return minified;
