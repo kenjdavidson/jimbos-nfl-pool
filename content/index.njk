@@ -14,7 +14,7 @@ title: Jimbo's NFL Pools
         <h2>Weeks</h2>
         <ul>
         {% for week in spreadPool %}
-            <li class=""><a href="/week/{{ week.week }}">{{ week.name }}</a></li>
+            <li class=""><a href="{{ ('/week/' + week.week) | url }}">{{ week.name }}</a></li>
         {% endfor %}
         </ul>
     </section>
@@ -31,7 +31,7 @@ title: Jimbo's NFL Pools
             {% for standing in latestWeek.standings %}
                 <tr>
                     <td>{{ standing.position }}</td>
-                    <td><a href="/players/{{ standing.player | slugify }}">{{ standing.player }}</a></td>
+                    <td><a href="{{ ('/players/' + (standing.player | slugify)) | url}}">{{ standing.player }}</a></td>
                     <td>{{ standing.points }}</td>
                     <td>{{ standing.wins }}</td>        
                 </tr>
@@ -40,7 +40,7 @@ title: Jimbo's NFL Pools
         </table>
         <p>
         Standings as of the completion from week {{ latestWeek.week-1 }}.  Estimated standings are displayed when looking
-        at the <a href="/week/{{ latestWeek.week }}">current week</a>.
+        at the <a href="{{ ('/week/' + latestWeek.week) | url }}">current week</a>.
         <p>
     </section>
 </div>
