@@ -1,6 +1,7 @@
 ---
 layout: layout.njk
 title: Jimbo's NFL Pools
+permalink: "/"
 ---
 
 {% set spreadPool = collections.spread_pool | sort(true, false, 'week') %}
@@ -31,7 +32,7 @@ title: Jimbo's NFL Pools
             {% for standing in latestWeek.standings %}
                 <tr>
                     <td>{{ standing.position }}</td>
-                    <td><a href="{{ ('/players/' + (standing.player | slugify)) | url}}">{{ standing.player }}</a></td>
+                    <td><a href="{{ ('/players/' + (standing.name | slugify)) | url}}">{{ standing.name }}</a></td>
                     <td>{{ standing.points }}</td>
                     <td>{{ standing.wins }}</td>        
                 </tr>

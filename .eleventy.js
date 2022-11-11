@@ -5,6 +5,7 @@ const eleventyNavigationPlugin = require('@11ty/eleventy-navigation');
 const classIfMatch = require('./src/filters/class-if-match');
 const jsonFilters = require('./src/filters/json');
 const minifyHtml = require('./src/transforms/html-minify');
+const playersCollection = require('./src/collections/players-collection');
 
 module.exports = function(eleventyConfig) {
 
@@ -37,6 +38,7 @@ module.exports = function(eleventyConfig) {
 
   // Collection
   eleventyConfig.addCollection("spread_pool", spreadPoolsCollection);
+  eleventyConfig.addCollection("players", playersCollection);
 
   return {
     passthroughFileCopy: true,

@@ -1,5 +1,6 @@
 const XLSX = require("xlsx");
 const ESPN = require("./api/espn");
+const filterName = require('./filters/name-filter');
 
 const PLAYER_REG = /^([^\(]+)(\([\d\.]+\)+)?$/i;
 const GAMES_REG = /^([A-Z\. ]+)(-[\d\s\/]+)([A-Z\. ]+)$/i;
@@ -26,7 +27,7 @@ module.exports = function (eleventyConfig) {
     await processGameResults(data);
     processPlayerPicks(data);
 
-    console.log(data);
+    logger.debug(JSON.stringify(data));
     return data;
   };
 
@@ -120,7 +121,7 @@ module.exports = function (eleventyConfig) {
 
         if (playerName) {
           playerPicks.push({
-            player: playerName.v.toUpperCase(),
+            name: filterName(playerName.v),
             ...extractPlayerPicks(worksheet, startCell),
           });
         }
@@ -252,7 +253,7 @@ module.exports = function (eleventyConfig) {
       standings.push({
         position: position.v,
         points: points.v,
-        player: parsedPlayer[1].trim(),
+        name: filterName(parsedPlayer[1]),
         wins: Number.parseFloat(
           (parsedPlayer[2] && parsedPlayer[2].slice(1, -1)) || 0
         ),

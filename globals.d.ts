@@ -25,14 +25,14 @@ interface GameResult {
 }
 
 interface PlayerRank {
-    player: string;
+    name: string;
     points: Number;
     position: Number;
     wins: Number;
 }
 
 interface PlayerPick {
-    player: string;
+    name: string;
     team: string;
     threePoint: boolean;
     covered?: boolean;
