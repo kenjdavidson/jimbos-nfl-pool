@@ -32,7 +32,7 @@ permalink: "/"
             {% for standing in latestWeek.standings %}
                 <tr>
                     <td>{{ standing.position }}</td>
-                    <td><a href="{{ ('/players/' + (standing.name | slugify)) | url}}">{{ standing.name }}</a></td>
+                    <td><a href="{{ ('/players/' + (standing.id | slugify)) | url}}">{{ standing.name }}</a></td>
                     <td>{{ standing.points }}</td>
                     <td>{{ standing.wins }}</td>        
                 </tr>

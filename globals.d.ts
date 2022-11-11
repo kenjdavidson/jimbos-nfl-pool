@@ -25,6 +25,7 @@ interface GameResult {
 }
 
 interface PlayerRank {
+    id: string;
     name: string;
     points: Number;
     position: Number;
@@ -32,6 +33,7 @@ interface PlayerRank {
 }
 
 interface PlayerPick {
+    id: string;
     name: string;
     team: string;
     threePoint: boolean;

@@ -1,20 +1,21 @@
+const spreadPoolCollection = require('./spread-pools-collection');
+
 module.exports = function(collectionsApi) {
-    let spreadPool = collectionsApi.getAll()[0].data.collections.spread_pool;
-    
-    const players = spreadPool[0]
-        .standings.map(s => ({ name: s.name, nameKey: cleanNameKey(s.name), weekPicks: [] }))
-        .reduce((p, c) => ({ ...p, [c.nameKey]: c }), {});
+    const spreadPools = spreadPoolCollection(collectionsApi);
 
-    // spreadPool.forEach(pool => {
-    //     pool.playerPicks.forEach(playerPick => {
-    //         const nameKey = cleanNameKey(playerPick.name);
+    const players = spreadPools[0]
+        .standings.map(s => ({ id: s.id, name: s.name, playerPicks: [] }))
+        .reduce((p, c) => ({ ...p, [c.id]: c }), {});
 
-    //     });
-    // });
-
+    spreadPools.forEach(weeklyPool => {
+        weeklyPool.playerPicks.forEach(playerPick => {
+            players[playerPick.id].playerPicks.push({
+                ...playerPick,
+                week: weeklyPool.week,
+                title: weeklyPool.title
+            });
+        });
+    });
+ 
     return Object.values(players);
-}
-
-function cleanNameKey(name) {
-    return name.toUpperCase().replaceAll(/[^\w-]/g, '_');
 }
