@@ -11,8 +11,8 @@
     "build": "NODE_ENV=production npm-run-all clean build:11ty build:css",
     "build:11ty": "eleventy",
     "build:css": "tailwindcss -i ./css/styles.css -o ./_site/styles.css",
-    "prettier": "prettier",
-    "prettier:check": "prettier --check"
+    "prettier": "prettier --write -c '{content,css,src}/**/*.{js,json,css,njk}'",
+    "prettier:check": "prettier --check -c '{content,css,src}//**/*.{js,json,css,njk}'"
   },
   "keywords": [],
   "author": "",
