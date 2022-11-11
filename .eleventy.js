@@ -4,8 +4,15 @@ const spreadPoolsCollection = require('./src/collections/spread-pools-collection
 const eleventyNavigationPlugin = require('@11ty/eleventy-navigation');
 const classIfMatch = require('./src/filters/class-if-match');
 const jsonFilters = require('./src/filters/json');
+const minifyHtml = require('./src/transforms/html-minify');
 
 module.exports = function(eleventyConfig) {
+
+  // Production specific features
+  if (process.env.NODE_ENV === 'production') {
+    eleventyConfig.addTransform('htmlmin', minifyHtml);
+  }  
+
   // Plugins
   eleventyConfig.addPlugin(eleventyNavigationPlugin);
 

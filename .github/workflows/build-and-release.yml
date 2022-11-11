@@ -2,5 +2,28 @@ name: Build and Release
 run-name: ${{ github.actor }} is releasing new spread pool results
 on:
   - push
-  - cron
+  - schedule:    
+    - cron: '45 23 * * 5,1'
+    - cron: '45 12,16,19,23 * * 0'
+  - workflow_dispatch
 jobs:
+  build-and-release:
+    runs-on: ubuntu-latest    
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install dependencies
+        run: npm ci
+      - name: Build project
+        run: npm run build
+      - name: Deploy to Github
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          publish_dir: _site
+          publish_branch: gh_pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
