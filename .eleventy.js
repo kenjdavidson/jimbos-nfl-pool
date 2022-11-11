@@ -18,6 +18,7 @@ module.exports = function(eleventyConfig) {
 
   // Passthroughs
   eleventyConfig.addPassthroughCopy("content/**/*.css");
+  eleventyConfig.addPassthroughCopy("content/CNAME");
 
   // Global data - there's got to be a better way
   eleventyConfig.addGlobalData("xlsxParsingRules", parsingRules);
