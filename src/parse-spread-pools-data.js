@@ -15,6 +15,8 @@ module.exports = function (eleventyConfig) {
     const workbook = XLSX.readFile(contents);
     const worksheet = workbook.Sheets["Sheet1"];
     const title = contents.split("/").slice(-1)[0].replace(".xlsx", "");
+
+    logger.info(`Processing XLSX data file ${contents}`);
     const data = {
       type: "spread_pool",
       title,
@@ -175,7 +177,7 @@ module.exports = function (eleventyConfig) {
    * @return {GameResult[]}
    */
   function games(worksheet, rules) {
-    logger.info(`processing games from worksheet`);
+    logger.debug(`Processing current week games/spread.`);
 
     let games = [];
     let cell = addressToXlsx(rules.games[0]);
@@ -191,13 +193,14 @@ module.exports = function (eleventyConfig) {
         const favorite = worksheet[xlsxToKey({ c: cell.c - 1, r: cell.r })];
         const underdog = worksheet[xlsxToKey({ c: cell.c + 1, r: cell.r })];
         const parsedGame = gameCell.v.match(GAMES_REG);
+        logger.debug(`Processing game [${parsedGame.toString()}]`);
 
         let game = {
-          favoriteTeam: parsedGame[1].trim().toUpperCase(),
+          favoriteTeam: tu(parsedGame[1]),
           favoriteScore: favorite && Number.parseInt(favorite.v),
-          underdogTeam: parsedGame[3].trim().toUpperCase(),
+          underdogTeam: tu(parsedGame[3]),
           underdogScore: underdog && Number.parseInt(underdog.v),
-          spread: convertScore(parsedGame[2]),
+          spread: convertScore(tu(parsedGame[2])),
         };
 
         // TODO: clean this up with a class
@@ -225,7 +228,7 @@ module.exports = function (eleventyConfig) {
   }
 
   function convertScore(score) {
-    return score && Number.parseFloat(score.replaceAll(/\s?1\/2/g, ".5"));
+    return score && Number.parseFloat(score.replace(/\s?1\/2/g, ".5"));
   }
 
   /**
@@ -268,6 +271,10 @@ module.exports = function (eleventyConfig) {
     return standings;
   }
 };
+
+function tu(value) {
+  return value.trim().toUpperCase();
+}
 
 /**
  * Converts a standard Excel address "A:1" to the XSLX { c: 0, r: 0 }.

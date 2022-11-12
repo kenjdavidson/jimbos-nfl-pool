@@ -7,23 +7,47 @@ pagination:
 permalink: "week/{{ week.week }}/"
 ---
 
-<section class="bread-crumbs shrink-0 grow-1">
-  <nav>
-    <ul class="list-none pl-0 text-lg flex flex-row justify-start align-middle">
-      <li class="list-none inline-block"><a href="{{ '/' | url }}" class="no-underline font-bold"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></a></li>
-      {% for week in collections.spread_pool | sort(false, true, 'week') %}
-      <li class="list-none inline-block"><a href="{{ ('/week/' + week.week) | url }}" class="no-underline font-light">{{ week.week }}</a></li>
-      {% endfor %}
-    </ul>
-  <nav>
-</section>
+<h1>{{ week.name }}</h1>
 
-<section>
-  <h1>{{ week.name }}</h1>
-</section>
+<section class="w-full flex flex-col lg:flex-row py-4">
 
-<div class="flex flex-col sm:flex-row">
-  <section class="week-games lg:mr-8 flex-shrink-0 flex-grow-0">
+  <!-- Displays all the player picks -->
+  <article class="px-2 lg:basis-9/12 week-picks overflow-auto">
+    <div class="overflow-x-auto relative">
+      <table class="not-prose w-full text-sm text-left text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-100 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-100 font-semibold">
+          <tr>
+            <th>Player</th>
+            {% for pick in week.playerPicks[0].picks %}
+            <th>&nbsp;</th>
+            {% endfor %}
+            <th>Points</th>
+            <th>TieBreak</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for playerPick in week.playerPicks | sort(true, true, 'points') %}
+          <tr>
+            <td class="player-name ">
+              <a class="font-semibold text-gray-800" 
+                href="{{ playerPick | playerUrl | url }}">
+                {{ playerPick.name }}
+              </a>
+            </td>
+            {% for pick in playerPick.picks %}
+            <td class="{{pick.team}}-{{week.games[loop.index-1].winningTeam}} spread{{ pick.team | classIfMatch(week.games[loop.index-1].winningTeam, 'winner') }}">{{ pick.team }}{{ pick.threePoint | threePoint }}</td>
+            {% endfor %}
+            <td class="font-semibold text-gray-800">{{ playerPick.points }}</td>
+            <td class="font-semibold text-gray-800">{{ playerPick.tieBreak }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <!-- Displays the week games and spreads -->
+  <article class="lg:basis-3/12" overflow-auto>
     <table class="not-prose w-full text-sm text-left text-gray-500 dark:text-gray-400">
       <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
         <tr>
@@ -32,13 +56,13 @@ permalink: "week/{{ week.week }}/"
           <th>&nbsp</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody class="font-semibold text-gray-800">
         {% for game in week.games %}
         <tr class="table-auto">
           <td class="game-score">
             <span class="spread{{ game.winningTeam | classIfMatch(game.favoriteTeam, 'covered') }}">{{ game.favoriteScore }}</span>
           </td>
-          <td class="font-medium text-center">
+          <td class="text-center ">
             <span class="favorite-team">{{ game.favoriteTeam }}</span>
             <span class="spread">{{ game.spread }}</span>
             <span class="underdog-team">{{ game.underdogTeam }}</span>
@@ -60,37 +84,5 @@ permalink: "week/{{ week.week }}/"
         </tr>
       </tbody>
     </table>
-  </section>
-  <section class="week-picks"> 
-    <div class="overflow-x-auto relative">
-      <table class="not-prose w-full text-sm text-left text-gray-500 dark:text-gray-400">
-        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-          <tr>
-            <th>Player</th>
-            {% for pick in week.playerPicks[0].picks %}
-            <th>&nbsp;</th>
-            {% endfor %}
-            <th>Points</th>
-            <th>TieBreak</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for playerPick in week.playerPicks | sort(true, true, 'points') %}
-          <tr>
-            <td class="player-name font-bold">
-              <a href="{{ playerPick | playerUrl | url }}">
-                {{ playerPick.name }}
-              </a>
-            </td>
-            {% for pick in playerPick.picks %}
-            <td class="{{pick.team}}-{{week.games[loop.index-1].winningTeam}} spread{{ pick.team | classIfMatch(week.games[loop.index-1].winningTeam, 'winner') }}">{{ pick.team }}{{ pick.threePoint | threePoint }}</td>
-            {% endfor %}
-            <td class="font-bold">{{ playerPick.points }}</td>
-            <td class="font-bold">{{ playerPick.tieBreak }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </section>
-</div>
+  </article>
+</section>

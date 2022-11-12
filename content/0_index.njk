@@ -4,25 +4,12 @@ title: Jimbo's NFL Pools
 permalink: "/"
 ---
 
-<section class="bread-crumbs shrink-0 grow-1">
-  <nav>
-    <ul class="list-none pl-0 text-lg flex flex-row justify-start align-middle">
-      <li class="list-none inline-block"><a href="{{ '/' | url }}" class="no-underline font-bold"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></a></li>
-      {% for week in collections.spread_pool | sort(false, true, 'week') %}
-      <li class="list-none inline-block"><a href="{{ ('/week/' + week.week) | url }}" class="no-underline font-light">{{ week.week }}</a></li>
-      {% endfor %}
-    </ul>
-  <nav>
-</section>
-
 {% set spreadPool = collections.spread_pool | sort(true, false, 'week') %}
 {% set latestWeek = spreadPool | first %}
-<section>
-    <h1 class="text-4xl font-bold tracking-tight text-gray-900">{{ title }}</h1>
-</section>
+<h1 class="text-4xl font-bold tracking-tight text-gray-900">{{ title }}</h1>
 
-<div class="w-full flex flex-col sm:flex-row flex-wrap sm:flex-nowrap py-4">
-    <section class="w-fixed px-2 flex-grow">
+<section class="w-full flex flex-col lg:flex-row py-4">
+    <article class="px-2 lg:basis-9/12">
         <table class="not-prose w-full text-sm text-left text-gray-500 dark:text-gray-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                 <th>#</th>
@@ -41,12 +28,12 @@ permalink: "/"
             {% endfor %}
             </tbody>
         </table>
-    </section>
+    </article>
 
-    <section class="md:flex-none flex-shrink md:max-w-xs my-3">
+    <article class="my-3 lg:basis-3/12">
         <p class="text-sm py-4 px-3 bg-blue-100 rounded dark:bg-blue-500 dark:text-white">
         Standings as of the completion from week {{ latestWeek.week-1 }}.  Estimated standings are displayed when looking
         at the <a href="{{ latestWeek | weekUrl | url }}">current week</a>.
         <p>
-    </section>
-</div>
+    </article>
+</section>

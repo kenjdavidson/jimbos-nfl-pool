@@ -4,15 +4,15 @@
 
 @layer components {
   .spread-covered {
-    @apply font-bold;
+    @apply font-semibold;
   }
 
   .spread-not-covered {
-    @apply text-red-500 font-light;
+    @apply text-red-800 font-light;
   }
 
   .spread-winner {
-    @apply font-bold bg-green-300;
+    @apply bg-green-200 text-gray-900;
   }
 
   .spread-not-winner {
