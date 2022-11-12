@@ -8,9 +8,11 @@
     "dev": "run-p dev:*",
     "dev:11ty": "eleventy --serve --watch",
     "dev:css": "tailwindcss -i ./css/styles.css -o ./_site/styles.css --watch",
-    "build": "NODE_ENV=production npm-run-all clean build:11ty build:css",
+    "dev:webpack": "webpack --watch",
+    "build": "NODE_ENV=production npm-run-all clean build:css build:webpack build:11ty ",
     "build:11ty": "eleventy --pathprefix=jimbos-nfl-pool",
     "build:css": "tailwindcss -i ./css/styles.css -o ./_site/styles.css --minify",
+    "build:webpack": "webpack",
     "prettier": "prettier --write -c '{content,css,src}/**/*.{js,json,css,njk}'",
     "prettier:check": "prettier --check -c '{content,css,src}//**/*.{js,json,css,njk}'"
   },
@@ -20,9 +22,11 @@
   "devDependencies": {
     "@11ty/eleventy": "^2.0.0-canary.16",
     "@11ty/eleventy-navigation": "^0.3.5",
+    "@hotwired/stimulus-webpack-helpers": "^1.0.1",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/line-clamp": "^0.4.2",
     "@tailwindcss/typography": "^0.5.8",
+    "@types/webpack-env": "^1.18.0",
     "eslint-config-prettier": "^8.5.0",
     "html-minifier": "^4.0.0",
     "jest": "^29.3.1",
@@ -30,12 +34,15 @@
     "prettier": "^2.7.1",
     "slugify": "^1.6.5",
     "tailwindcss": "^3.2.3",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^4.10.0",
     "xlsx": "^0.18.5"
   },
   "11ty": {
     "title": "Jimbo's NFL Pools"
   },
   "dependencies": {
-    "@11ty/eleventy-fetch": "^3.0.0"
+    "@11ty/eleventy-fetch": "^3.0.0",
+    "@hotwired/stimulus": "^3.1.1"
   }
 }

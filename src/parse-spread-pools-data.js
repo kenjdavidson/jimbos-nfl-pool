@@ -104,7 +104,7 @@ module.exports = function (eleventyConfig) {
    * that span from the start column to the first blank.  May need to find a better way to manage
    * this, but for the time being it should be safe.
    *
-   * @param {Sheet} worksheet
+   * @param {import("xlsx").Sheet} worksheet
    * @param {ParsingRules} rules
    * @return {PlayerPick[]}
    */
