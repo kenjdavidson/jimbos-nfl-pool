@@ -1,24 +1,58 @@
 import { Controller } from '@hotwired/stimulus';
 
 const DARK_MODE_KEY = 'dark_mode';
-const DARK_MODE_OPT = ['dark', 'light'];
+
+enum Mode {
+    DARK = 'dark',
+    LIGHT = 'light'
+};
+
+function fromValue(mode: string | null) {
+    if (mode == Mode.DARK) return Mode.DARK;
+    if (mode == Mode.LIGHT) return Mode.LIGHT;
+    return null;
+}
 
 export default class DarkModeController extends Controller<HTMLElement> {    
-    declare readonly hasToggleTarget: boolean;
-    declare readonly toggleTarget: HTMLInputElement;
-    declare readonly toggleTargets: HTMLInputElement[];
+    prefersDark: boolean = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    currentMode: Mode = this.getMode()
 
-    prefersDark: boolean;
-
-    initialize() {
-        this.prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    initialize() {        
         console.debug(`User ${this.prefersDark ? 'prefers' : 'does not prefer'} dark mode.`);
-
-        const savedMode = localStorage.getItem(DARK_MODE_KEY) || this.prefersDark ? DARK_MODE_OPT[0] : DARK_MODE_OPT[1];
-        console.debug(`Currently saved setting is ${savedMode}`);
+        console.debug(`Currently saved setting is ${this.currentMode}`);
     }
 
-    toggleDarkMode() {
+    connect() {
+        if (!this.element.classList.contains(this.currentMode)) {
+            this.element.classList.add(this.currentMode);
+        }        
+    }
 
+    toggle() {
+        const originalMode = this.currentMode;
+
+        if (this.currentMode == Mode.DARK) {
+            this.currentMode = this.saveMode(Mode.LIGHT);
+        } else if (this.currentMode == Mode.LIGHT) {
+            this.currentMode = this.prefersDark 
+                ? this.removeMode(Mode.DARK) : this.saveMode(Mode.DARK);
+        }
+
+        console.debug(`Toggling mode from ${originalMode} to ${this.currentMode}`);   
+        this.element.classList.replace(originalMode, this.currentMode);
+    }
+
+    getMode(): Mode {;        
+        return fromValue(localStorage.getItem(DARK_MODE_KEY)) || (this.prefersDark ? Mode.DARK : Mode.LIGHT);
+    }
+
+    saveMode(mode: Mode): Mode {
+        localStorage.setItem(DARK_MODE_KEY, mode);
+        return mode;
+    }
+
+    removeMode(mode: Mode): Mode {
+        localStorage.removeItem(DARK_MODE_KEY);
+        return mode;
     }
 }
