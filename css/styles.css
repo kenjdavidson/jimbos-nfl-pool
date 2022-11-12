@@ -8,15 +8,15 @@
   }
 
   .spread-not-covered {
-    @apply text-red-800 font-light;
+    @apply text-red-800 font-bold;
   }
 
   .spread-winner {
-    @apply bg-green-200 text-gray-900;
+    @apply bg-green-300 dark:bg-green-800 dark:text-white;
   }
 
   .spread-not-winner {
-    @apply text-red-500;
+    @apply text-red-800 font-bold;
   }
 }
 

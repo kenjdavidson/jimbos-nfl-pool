@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-controller="dark-mode" class="dark">
   <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,7 +8,7 @@
     <title>{{ title }}</title>
     <link rel="stylesheet" href="{{ '/styles.css' | url }}">
   </head>
-  <body class="w-full h-full bg-white prose prose-headings mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2">
+  <body class="w-full h-full bg-white dark:bg-slate-800 prose prose-headings dark:prose-invert mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2">
     <header class="bread-crumbs shrink-0 grow-1">
       <nav>
         <ul class="list-none pl-0 text-lg flex flex-row justify-start align-middle">
@@ -19,12 +19,28 @@
         </ul>
       <nav>
     </header>
+    
     <main> 
       <div class="w-full w-max-full pt-8 pb-6 overflow-hidden">
         {{ content | safe }}
       </div>
     </main>
 
+    <footer>
+      <div class="flex flex-col lg:flex-row">
+        <div>
+          <h2 class="font-light">Share</h2>
+          <img data-controller="qr-code"></img>
+        </div>     
+        <div>
+          <h2 class="font-light">Resources</h2>
+          <ul class="">
+            <li class="list-none"><a href="">Rules</a></li>
+          </ul>
+        </div>        
+      </div>      
+      </div>      
+    </footer>
     <script defer src="{{ '/bundle.js' | url }}"></script>
   </body>
 </html>
