@@ -6,6 +6,8 @@ const classIfMatch = require('./src/filters/class-if-match');
 const jsonFilters = require('./src/filters/json');
 const minifyHtml = require('./src/transforms/html-minify');
 const playersCollection = require('./src/collections/players-collection');
+const ordinalFilter = require('./src/filters/ordinal');
+const playerFilters = require('./src/filters/player');
 
 module.exports = function(eleventyConfig) {
 
@@ -28,7 +30,10 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addFilter("toJson", jsonFilters.toJson);
   eleventyConfig.addFilter("fromJson", jsonFilters.fromJson);
   eleventyConfig.addFilter("classIfMatch", classIfMatch);
-  eleventyConfig.addFilter("threePoint", value => value ? '**' : '');
+  eleventyConfig.addFilter("threePoint", playerFilters.threePoint);
+  eleventyConfig.addFilter("playerUrl", playerFilters.playerUrl);
+  eleventyConfig.addFilter("weekUrl", playerFilters.weekUrl);
+  eleventyConfig.addFilter("ordinal", ordinalFilter);
 
   // Custom extentions
   eleventyConfig.addDataExtension("xlsx", {

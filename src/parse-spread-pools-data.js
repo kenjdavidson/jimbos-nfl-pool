@@ -1,6 +1,6 @@
 const XLSX = require("xlsx");
 const ESPN = require("./api/espn");
-const namekey = require('./filters/name-key');
+const { slugify } = require("./filters/player");
 
 const PLAYER_REG = /^([^\(]+)(\([\d\.]+\)+)?$/i;
 const GAMES_REG = /^([A-Z\. ]+)(-[\d\s\/]+)([A-Z\. ]+)$/i;
@@ -119,7 +119,7 @@ module.exports = function (eleventyConfig) {
 
         if (playerName) {
           playerPicks.push({
-            id: namekey(playerName.v),
+            id: slugify(playerName.v),
             name: playerName.v,
             ...extractPlayerPicks(worksheet, startCell),
           });
@@ -129,7 +129,7 @@ module.exports = function (eleventyConfig) {
       } while (playerName !== undefined);
     });
 
-    return playerPicks; 
+    return playerPicks;
   }
 
   function extractPlayerPicks(worksheet, startCell) {
@@ -250,10 +250,10 @@ module.exports = function (eleventyConfig) {
       const parsedPlayer = player.v.match(PLAYER_REG);
 
       standings.push({
-        id: namekey(parsedPlayer[1]),
+        id: slugify(parsedPlayer[1]),
         name: parsedPlayer[1],
         position: position.v,
-        points: points.v,        
+        points: points.v,
         wins: Number.parseFloat(
           (parsedPlayer[2] && parsedPlayer[2].slice(1, -1)) || 0
         ),

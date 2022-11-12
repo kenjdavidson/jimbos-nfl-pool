@@ -4,38 +4,61 @@ pagination:
   data: collections.players
   size: 1
   alias: player
-permalink: "players/{{ player.id | slugify }}/"
+permalink: "players/{{ player.id }}/"
 ---
 
 
 <section class="bread-crumbs shrink-0 grow-1">
   <ul class="list-none pl-0 text-lg flex flex-row justify-start align-middle">
     <li class="list-none inline-block"><a href="{{ '/' | url }}" class="no-underline font-bold"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></a></li>
+    {% for week in collections.spread_pool | sort(false, true, 'week') %}
+    <li class="list-none inline-block"><a href="{{ ('/week/' + week.week) | url }}" class="no-underline font-light">{{ week.week }}</a></li>
+    {% endfor %}
   </ul>
 </section>
 
 <section>
   <h1>{{ player.name }}</h1>
-</section>
-
-<section>
-  <table>
-    <thead>
+  <h2 class="font-light">{{ player.standing.position | ordinal }} <span class="font-thin">Place</span> {{ player.standing.points }} <span class="font-thin">Points</span></h2>
+  <table class="not-prose w-full text-sm text-left text-gray-500 dark:text-gray-400">
+    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
       <tr>
         <th>Week</th>
+        {% for index in range(0, 17) %}
+        <th>&nbsp;</th>
+        {% endfor %}
+        <th>TieBreak</th>
+        <th>Points</th>        
       </tr>      
     </thead>
     <tbody>
       {% for picks in player.playerPicks | sort(false, true, 'week') %}
       <tr>
         <td>{{ picks.week }}</td>
-        {% for pick in picks.picks %}
-        <td class="{{pick.team}}-{{week.games[loop.index-1].winningTeam}} spread{{ pick.team | classIfMatch(week.games[loop.index-1].winningTeam, 'winner') }}">{{ pick.team }}{{ pick.threePoint | threePoint }}</td>
+        {% for index in range(0, 17) %}
+        {% set pick = picks.picks[index] %}
+        <td class="{{pick.team}} {{pick.points}} spread{{ pick.team | classIfMatch(pick.winningTeam, 'winner') }}">
+          {{ pick.team }}{{ pick.threePoint | threePoint }}          
+        </td>
         {% endfor %}
-        <td class="font-bold">{{ playerPick.points }}</td>
-        <td class="font-bold">{{ playerPick.tieBreak }}</td>
+        <td class="font-bold">{{ picks.tieBreak }}</td>
+        <td class="font-bold">{{ picks.points }}</td>        
       </tr>
       {% endfor %}
     </tbody>
   </table>
+</section>
+
+<section>
+  <h2 class="font-light">Players</h2>
+  <ul class="m-0 p-0">
+    {% for p in collections.players %}
+    <li class="inline-block list-none p-3">
+      <a 
+        class="font-light no-underline" 
+        href="{{ p | playerUrl | url }}">{{ p.name }}
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
 </section>
