@@ -9,7 +9,7 @@
     "dev:11ty": "eleventy --serve --watch",
     "dev:css": "tailwindcss -i ./css/styles.css -o ./_site/styles.css --watch",
     "dev:webpack": "webpack --watch",
-    "build": "NODE_ENV=production npm-run-all clean build:css build:webpack build:11ty ",
+    "build": "NODE_ENV=production npm-run-all clean build:*",
     "build:11ty": "eleventy --pathprefix=jimbos-nfl-pool",
     "build:css": "tailwindcss -i ./css/styles.css -o ./_site/styles.css --minify",
     "build:webpack": "webpack",
