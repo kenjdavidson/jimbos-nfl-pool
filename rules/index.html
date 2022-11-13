@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en" data-controller="dark-mode">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    
+    <title>Pool Rules</title>
+    <link rel="stylesheet" href="/jimbos-nfl-pool/styles.css">
+    <script type="text/javascript">
+      // Load the page with dark if preferred
+      var isDarkPreferred = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      var savedModePreferred = window.localStorage.getItem('dark_mode');
+      var initialMode = savedModePreferred || (isDarkPreferred ? 'dark' : 'light');
+      document.querySelector('html').classList.add(initialMode);
+    </script>
+  </head>
+  <body class="w-full h-full bg-white dark:bg-slate-800 prose prose-headings dark:prose-invert mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2">
+
+    <header class="bread-crumbs shrink-0 grow-1">
+      <nav class="flex justify-between content-center">
+        <ul class="list-none pl-0 text-lg flex flex-row justify-start align-middle">
+          <li class="list-none inline-block"><a href="/jimbos-nfl-pool/" class="no-underline font-bold"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></a></li>
+          
+          <li class="list-none inline-block"><a href="/jimbos-nfl-pool/week/8" class="no-underline font-light">8</a></li>
+          
+          <li class="list-none inline-block"><a href="/jimbos-nfl-pool/week/9" class="no-underline font-light">9</a></li>
+          
+          <li class="list-none inline-block"><a href="/jimbos-nfl-pool/week/10" class="no-underline font-light">10</a></li>
+          
+        </ul>
+        <button data-action="dark-mode#toggle">(x)</button>        
+      </nav>
+    </header>
+    
+    <main> 
+      <div class="w-full w-max-full pt-8 pb-6 overflow-hidden">
+        <h1>N.F.L. RULES &amp; REGULATIONS (SPREAD &amp; SUICIDE)</h1>
+<h2>SPREAD POOL</h2>
+<p>Cost: <strong>$5</strong> per week plus <strong>$20</strong> at the end of year for overall winner (<strong>$105</strong>)</p>
+<p>Pick every game that week with the spread.Give your pick for the total points that will be scored in the Monday night game(tie break #2).Official spreads will be at NFL on Yahoo! Sports - News, Scores, Standings, Rumors, Fantasy Games at 6:30pm on the Thursday of that week.All whole spreads will go down by ½ point.Eg. Pitt -3 Mia. will become 2 ½…Den -3 ½ ST.L will stay at 3 ½.</p>
+<p>Designate one of those games as your 3-point pick.If you win that game you will receive 3 points.All other games are worth one point.There is no limit on the # of times</p>
+<p>you can pick a particular team for your 3-pointer during the year.
+The person with the most points after that weeks games wins the prize money of $5 per person.EG.15 players ,YOU WIN $75(minus your own)</p>
+<h3>Tie break</h3>
+<ol>
+<li>player with the most # of games won that week</li>
+<li>-player whose Monday night total is closest to the Monday nightgame total points.If still tied,money will be split.</li>
+<li>player whose Monday night total is closest without going over.</li>
+</ol>
+<blockquote>
+<p>Note: If you lose a tie break, you do not pay $5 for that week.</p>
+</blockquote>
+<h3>Results</h3>
+<ul>
+<li>Player with the most points at the end of the regular season(all 17 weeks added up) will win the overall money.$20 from each player.</li>
+<li>Player who finishes second overall wins $20.</li>
+<li>If you do not get your picks in, your standing order will come into play .</li>
+<li>ALL picks must be in by 8:00pm Thursday for that weeks games</li>
+<li>No money will be collected or paid out until the end of the season,but I will accept</li>
+<li>Money and hold it till the end of the season if you wish to do it that way.All newcomers
+must pay up front.</li>
+</ul>
+<h2>SUICIDE POOL</h2>
+<p>Entry fee:$10 one time payment.</p>
+<p>Pick one team to win or tie that week.No spread.If you don’t lose,you advance to the
+next week.If you lose,you are out.You cannot pick the same team more than once
+during this pool. Eg. If you pick Denver in week one and win,you can’t pick Denver
+again.  Ever!Last one standing wins all the money.</p>
+<p>There will be a magic number.This means the pool will have to get down to this #
+of players or less. Eg. If the magic # is 5,there will have to be 5 or less players left
+at any point during the pool.If there are 6 players left and all 6 lose that same week,
+all other players will be invited back into the pool at a cost of $5,and the pool will
+start over.The 6 who lost will not have to pay the re-entry fee.
+The magic # will be set prior to the start of season,and will depend on the #
+of entries.Picks must be in Thursdays by 8pm.If you are eliminated in the first week,you may re-enter
+the pool at a cost of $20.This is only good for week # 1.</p>
+<p>I you have any questions just ask Jimbo.</p>
+<p>You can get your picks in at e-mail <a href="emailto:JMCEWAN@ROGERS.COM">JMCEWAN@ROGERS.COM</a></p>
+
+      </div>
+    </main>
+
+    <footer>
+      <div class="flex flex-col lg:flex-row">
+        <div>
+          <h2 class="font-light">Share</h2>
+          <img data-controller="qr-code">
+        </div>     
+        <div>
+          <h2 class="font-light">Resources</h2>
+          <ul class="">
+            <li class="list-none"><a href="/jimbos-nfl-pool/rules">Rules</a></li>
+          </ul>
+        </div>        
+      </div>      
+    </footer>
+    <script defer src="/jimbos-nfl-pool/bundle.js"></script>
+  </body>
+</html>
