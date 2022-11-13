@@ -14,18 +14,33 @@ function fromValue(mode: string | null) {
 }
 
 export default class DarkModeController extends Controller<HTMLElement> {    
+    static targets = [ "darkIcon", "lightIcon" ]
+
+    declare readonly hasDarkIconTarget: boolean;
+    declare readonly darkIconTarget: HTMLInputElement;
+    declare readonly darkIconTargets: HTMLInputElement[];
+    declare readonly hasLightIconTarget: boolean;
+    declare readonly lightIconTarget: HTMLInputElement;
+    declare readonly lightIconTargets: HTMLInputElement[];
+
     prefersDark: boolean = window.matchMedia('(prefers-color-scheme: dark)').matches;
     currentMode: Mode = this.getMode()
 
     initialize() {        
         console.debug(`User ${this.prefersDark ? 'prefers' : 'does not prefer'} dark mode.`);
         console.debug(`Currently saved setting is ${this.currentMode}`);
+        this.setIcons();
     }
 
     connect() {
         if (!this.element.classList.contains(this.currentMode)) {
             this.element.classList.add(this.currentMode);
-        }        
+        } 
+    }
+
+    setIcons() {
+        this.darkIconTargets.forEach(d => d.style.display = (this.currentMode === Mode.LIGHT ? 'none' : 'block'));
+        this.lightIconTargets.forEach(d => d.style.display = (this.currentMode === Mode.DARK  ? 'none' : 'block'));
     }
 
     toggle() {
@@ -40,6 +55,7 @@ export default class DarkModeController extends Controller<HTMLElement> {
 
         console.debug(`Toggling mode from ${originalMode} to ${this.currentMode}`);   
         this.element.classList.replace(originalMode, this.currentMode);
+        this.setIcons();
     }
 
     getMode(): Mode {;        
