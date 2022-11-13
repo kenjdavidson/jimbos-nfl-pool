@@ -6,9 +6,12 @@ on:
     branches: 
       - main
   schedule:
-    - cron: '45 4 * * 5,2' # Thursday/Monday night game 11:45pm
-    - cron: '45 15,19,23 * * 0' # Sunday games 11:45am, 3:45pm, 7:45pm
-    - cron: '45 4 * * 1' # Sunday game 11:45pm
+    # Thursday 11:45pm = Friday 4:45am
+    # Sunday 11:45am, 3:45pm = Sunday 4:45pm, 8:45pm
+    # Sunday 7:45pm, 11:45pm = Monday 12:45, 4:45am
+    # Monday 11:45pm = Tuesday 4:45am
+    - cron: '45 0,4 * * 1,2,5'
+    - cron: '45 16,20 * * 0'
 jobs:
   build-and-release:
     runs-on: ubuntu-latest    
