@@ -7,7 +7,7 @@
     
     <title>Pool Rules</title>
     <link rel="stylesheet" href="/jimbos-nfl-pool/styles.css">
-    <script type="text/javascript">
+    <script>
       // Load the page with dark if preferred
       var isDarkPreferred = window.matchMedia('(prefers-color-scheme: dark)').matches;
       var savedModePreferred = window.localStorage.getItem('dark_mode');
@@ -90,7 +90,7 @@ the pool at a cost of $20.This is only good for week # 1.</p>
       <div class="flex flex-col md:flex-row">
         <div>
           <h2 class="font-light">Share</h2>
-          <img data-controller="qr-code">
+          <img data-controller="qr-code" src="" alt="Shared page with the qr code">
         </div>     
         <div class="md:pl-6">
           <h2 class="font-light">Resources</h2>

@@ -5,9 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     
-    <title></title>
+    <title>{{ player.name }} pools profile</title>
     <link rel="stylesheet" href="/jimbos-nfl-pool/styles.css">
-    <script type="text/javascript">
+    <script>
       // Load the page with dark if preferred
       var isDarkPreferred = window.matchMedia('(prefers-color-scheme: dark)').matches;
       var savedModePreferred = window.localStorage.getItem('dark_mode');
@@ -45,7 +45,7 @@
 <h2 class="font-light">20th <span class="font-thin">Place</span> 66 <span class="font-thin">Points</span></h2>
 
 <section>
-  <article class="overflow-auto">
+  <div class="overflow-auto">
     <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
       <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 font-semibold">
         <tr>
@@ -369,9 +369,9 @@
         
       </tbody>
     </table>
-  </article>
+  </div>
 
-  <article>
+  <div>
     <h2 class="font-light">Players</h2>
     <ul class="m-0 p-0">
       
@@ -476,7 +476,7 @@
       </li>
       
     </ul>
-  </article>
+  </div>
 </section>
       </div>
     </main>
@@ -485,7 +485,7 @@
       <div class="flex flex-col md:flex-row">
         <div>
           <h2 class="font-light">Share</h2>
-          <img data-controller="qr-code">
+          <img data-controller="qr-code" src="" alt="Shared page with the qr code">
         </div>     
         <div class="md:pl-6">
           <h2 class="font-light">Resources</h2>
