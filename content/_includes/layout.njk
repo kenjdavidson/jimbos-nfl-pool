@@ -7,7 +7,7 @@
     <!-- Grab title from the page data and dump it here -->
     <title>{{ title }}</title>
     <link rel="stylesheet" href="{{ '/styles.css' | url }}">
-    <script type="text/javascript">
+    <script>
       // Load the page with dark if preferred
       var isDarkPreferred = window.matchMedia('(prefers-color-scheme: dark)').matches;
       var savedModePreferred = window.localStorage.getItem('dark_mode');
@@ -56,7 +56,7 @@
       <div class="flex flex-col md:flex-row">
         <div>
           <h2 class="font-light">Share</h2>
-          <img data-controller="qr-code"></img>
+          <img data-controller="qr-code" src="" alt="Shared page with the qr code"></img>
         </div>     
         <div class="md:pl-6">
           <h2 class="font-light">Resources</h2>

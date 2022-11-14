@@ -4,6 +4,7 @@ pagination:
   data: collections.players
   size: 1
   alias: player
+title: "{{ player.name }} pools profile"
 permalink: "players/{{ player.id }}/"
 ---
 
@@ -11,7 +12,7 @@ permalink: "players/{{ player.id }}/"
 <h2 class="font-light">{{ player.standing.position | ordinal }} <span class="font-thin">Place</span> {{ player.standing.points }} <span class="font-thin">Points</span></h2>
 
 <section>
-  <article class="overflow-auto">
+  <div class="overflow-auto">
     <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
       <thead class="text-xs uppercase bg-gray-50 dark:bg-gray-700 font-semibold">
         <tr>
@@ -39,9 +40,9 @@ permalink: "players/{{ player.id }}/"
         {% endfor %}
       </tbody>
     </table>
-  </article>
+  </div>
 
-  <article>
+  <div>
     <h2 class="font-light">Players</h2>
     <ul class="m-0 p-0">
       {% for p in collections.players %}
@@ -53,5 +54,5 @@ permalink: "players/{{ player.id }}/"
       </li>
       {% endfor %}
     </ul>
-  </article>
+  </div>
 </section>

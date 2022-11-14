@@ -8,7 +8,7 @@ permalink: "/"
 {% set latestWeek = spreadPool | first %}
 <h1 class="text-4xl font-bold tracking-tight">Spread Pool</h1>
 
-<section class="w-full flex flex-col lg:flex-row py-4">
+<div class="w-full flex flex-col lg:flex-row py-4">
     <article class="px-2 lg:basis-9/12">
         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
             <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -36,7 +36,7 @@ permalink: "/"
         at the <a href="{{ latestWeek | weekUrl | url }}">current week</a>.
         <p>
     </article>
-</section>
+</div>
 
 <h1>Suicide Pool</h1>
 
