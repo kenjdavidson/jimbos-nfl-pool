@@ -5,7 +5,12 @@ module.exports = {
     '_site/**/*.{html,njk,md}'
   ],
   theme: {
-    extend: {},
+    extend: {
+      blur: {
+        xs2: '1px',
+        xs: '2px',
+      }
+    },
   },
   plugins: [
     require('@tailwindcss/typography')

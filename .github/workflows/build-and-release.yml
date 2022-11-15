@@ -1,5 +1,4 @@
 name: Build and Release
-run-name: ${{ github.actor }} is releasing new spread pool results
 on:
   workflow_dispatch:    
   push:
