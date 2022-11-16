@@ -43,12 +43,6 @@ module.exports = function (eleventyConfig) {
   async function processGameResults(data) {
     logger.info(`Processing game results for week ${data.week}`);
 
-    if (data.games[0].favoriteScore) {
-      // lol this should be a better check
-      logger.info(`No games to process or scores already exist, skipping...`);
-      return;
-    }
-
     const scoreboard = await ESPN.getScoreboard(data.week);
     const teamScores = scoreboard.events
       .map((event) => event.competitions[0])
@@ -89,8 +83,7 @@ module.exports = function (eleventyConfig) {
 
       data.games.forEach((game, j) => {
         if (
-          game.completed &&
-          data.playerPicks[i].picks[j].team === data.games[j].winningTeam
+          game.completed && data.playerPicks[i].picks[j].team === data.games[j].winningTeam
         ) {
           playerPick.picks[j].covered = true;
           playerPick.points += data.playerPicks[i].picks[j].threePoint ? 3 : 1;
