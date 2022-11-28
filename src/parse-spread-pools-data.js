@@ -104,6 +104,10 @@ module.exports = function (eleventyConfig) {
   function playerPicks(worksheet, rules) {
     let playerPicks = [];
 
+    const startGamesCell = addressToXlsx(rules.games[0]);
+    const startStandingsCell = addressToXlsx(rules.standings[0]);
+    const maxGames = startStandingsCell.r - startGamesCell.r;
+
     rules.playerPicks.forEach((startRule) => {
       let startCell = addressToXlsx(startRule);
       let playerName;
@@ -116,7 +120,7 @@ module.exports = function (eleventyConfig) {
           playerPicks.push({
             id: slugify(playerName.v),
             name: playerName.v,
-            ...extractPlayerPicks(worksheet, startCell),
+            ...extractPlayerPicks(worksheet, startCell, maxGames),
           });
         }
 
@@ -127,12 +131,13 @@ module.exports = function (eleventyConfig) {
     return playerPicks;
   }
 
-  function extractPlayerPicks(worksheet, startCell) {
+  function extractPlayerPicks(worksheet, startCell, maxGames) {
     let cell = { c: startCell.c, r: startCell.r + 1 };
     let picks = [];
     let points = [];
     let undefinedCount = 0;
-    while (undefinedCount < 2) {
+    let gamesCount = 0;
+    while (undefinedCount < 2 && ++gamesCount < maxGames) {
       let pickCell = worksheet[xlsxToKey(cell)];
       if (pickCell === undefined) {
         undefinedCount++;
@@ -174,8 +179,9 @@ module.exports = function (eleventyConfig) {
 
     let games = [];
     let cell = addressToXlsx(rules.games[0]);
+    let maxCell = addressToXlsx(rules.standings[0]);
     let undefinedCount = 0;
-    while (undefinedCount < 2) {
+    while (undefinedCount < 2 && cell.r < maxCell.r) {
       let gameCell = worksheet[xlsxToKey(cell)];
 
       if (gameCell === undefined) {
