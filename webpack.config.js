@@ -1,6 +1,7 @@
 // Generated using webpack-cli https://github.com/webpack/webpack-cli
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const HtmlReplaceWebpackPlugin = require('html-replace-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 
 const isProduction = process.env.NODE_ENV == "production";
@@ -15,20 +16,21 @@ const prodPlugins = isProduction ? [
     replacement: `bundle.${buildTime}.js`
   },{
     pattern: 'styles.css',
-    replacement: `styles.${buildTime}.js`
+    replacement: `styles.${buildTime}.css`
   }])
 ] : [];
 
 const config = {
-  entry: {
-    bundle: "./src/stimulus.ts",
-    styles: "./css/styles.css"
-  },
+  entry: ["./src/stimulus.ts", "./css/styles.css"],
   output: {
-    filename: isProduction ? `[name].${buildTime}.js` : `[name].js`,
+    filename: isProduction ? `bundle.${buildTime}.js` : `bundle.js`,
     path: path.resolve(__dirname, "./_site"),
   },
-  plugins: [...prodPlugins],
+  plugins: [
+    ...prodPlugins,
+    new MiniCssExtractPlugin({
+      filename: isProduction ? `styles.${buildTime}.css` : `styles.css`,
+  }),],
   module: {
     rules: [
       {
@@ -37,7 +39,7 @@ const config = {
         exclude: ["/node_modules/"],
       },{
         test: /\.css$/i,
-        use: ['css-loader', 'postcss-loader']
+        use: [MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader']
       }
     ],
   },
