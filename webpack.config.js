@@ -6,22 +6,25 @@ const path = require('path');
 
 let isProduction = process.env.NODE_ENV == "production";
 const buildTime = Math.floor(Date.now() / 1000);
+
+// This only works for the first layout, it does not work for remaining pages
+isProduction = false;
+// Remove after fixed
+
 const prodPlugins = isProduction ? [
   new HtmlWebpackPlugin({
     template: path.resolve(__dirname, "./_site/index.html"),
     inject: false
   }),
-  // new HtmlReplaceWebpackPlugin([{
-  //   pattern: 'bundle.js',
-  //   replacement: `bundle.${buildTime}.js`
-  // },{
-  //   pattern: 'styles.css',
-  //   replacement: `styles.${buildTime}.css`
-  // }])
+  new HtmlReplaceWebpackPlugin([{
+    pattern: 'bundle.js',
+    replacement: `bundle.${buildTime}.js`
+  },{
+    pattern: 'styles.css',
+    replacement: `styles.${buildTime}.css`
+  }])
 ] : [];
 
-// This only works for the first layout, it does not work for remaining pages
-isProduction = false;
 const config = {
   entry: ["./src/stimulus.ts", "./css/styles.css"],
   output: {
