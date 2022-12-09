@@ -4,7 +4,7 @@ const HtmlReplaceWebpackPlugin = require('html-replace-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
 
-const isProduction = process.env.NODE_ENV == "production";
+let isProduction = process.env.NODE_ENV == "production";
 const buildTime = Math.floor(Date.now() / 1000);
 const prodPlugins = isProduction ? [
   new HtmlWebpackPlugin({
@@ -20,6 +20,8 @@ const prodPlugins = isProduction ? [
   }])
 ] : [];
 
+// This only works for the first layout, it does not work for remaining pages
+isProduction = false;
 const config = {
   entry: ["./src/stimulus.ts", "./css/styles.css"],
   output: {
