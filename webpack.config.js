@@ -3,27 +3,31 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const HtmlReplaceWebpackPlugin = require('html-replace-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const path = require('path');
+const glob = require('glob');
 
-let isProduction = process.env.NODE_ENV == "production";
 const buildTime = Math.floor(Date.now() / 1000);
+const isProduction = process.env.NODE_ENV == "production";
+const productionPlugins = [];
 
-// This only works for the first layout, it does not work for remaining pages
-isProduction = false;
-// Remove after fixed
+if (isProduction) {
+  const siteDirectory = path.resolve(__dirname, "./_site");
+  const pages = glob.sync("**/*.html", { cwd: siteDirectory });
 
-const prodPlugins = isProduction ? [
-  new HtmlWebpackPlugin({
-    template: path.resolve(__dirname, "./_site/index.html"),
-    inject: false
-  }),
-  new HtmlReplaceWebpackPlugin([{
+  console.log(pages);
+  const htmlWebpackPlugins = pages.map(page => new HtmlWebpackPlugin({
+      template: `${siteDirectory}/${page}`,
+      filename: `${siteDirectory}/${page}`,
+      inject: false
+    }));    
+  productionPlugins.push(...htmlWebpackPlugins);
+  productionPlugins.push(  new HtmlReplaceWebpackPlugin([{
     pattern: 'bundle.js',
     replacement: `bundle.${buildTime}.js`
   },{
     pattern: 'styles.css',
     replacement: `styles.${buildTime}.css`
-  }])
-] : [];
+  }]));  
+}
 
 const config = {
   entry: ["./src/stimulus.ts", "./css/styles.css"],
@@ -32,7 +36,7 @@ const config = {
     path: path.resolve(__dirname, "./_site"),
   },
   plugins: [
-    ...prodPlugins,
+    ...productionPlugins,
     new MiniCssExtractPlugin({
       filename: isProduction ? `styles.${buildTime}.css` : `styles.css`,
   }),],
