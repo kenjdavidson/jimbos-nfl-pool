@@ -11,13 +11,13 @@ const prodPlugins = isProduction ? [
     template: path.resolve(__dirname, "./_site/index.html"),
     inject: false
   }),
-  new HtmlReplaceWebpackPlugin([{
-    pattern: 'bundle.js',
-    replacement: `bundle.${buildTime}.js`
-  },{
-    pattern: 'styles.css',
-    replacement: `styles.${buildTime}.css`
-  }])
+  // new HtmlReplaceWebpackPlugin([{
+  //   pattern: 'bundle.js',
+  //   replacement: `bundle.${buildTime}.js`
+  // },{
+  //   pattern: 'styles.css',
+  //   replacement: `styles.${buildTime}.css`
+  // }])
 ] : [];
 
 // This only works for the first layout, it does not work for remaining pages
