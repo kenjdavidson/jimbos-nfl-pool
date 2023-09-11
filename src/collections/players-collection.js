@@ -7,12 +7,14 @@ module.exports = function (collectionsApi) {
     .map((s) => ({ id: s.id, name: s.name, playerPicks: [] }))
     .reduce((p, c) => ({ ...p, [c.id]: c }), {});
 
+  console.debug(`Available players:`, players);
   spreadPools.forEach((weeklyPool) => {
     weeklyPool.playerPicks.forEach((playerPick, i) => {
       const combined = playerPick.picks.map((p, i) => ({
         ...p,
         ...weeklyPool.games[i],
       }));
+      console.debug(`Processing player ${playerPick.id}`);
       players[playerPick.id].playerPicks.push({
         ...playerPick,
         week: weeklyPool.week,

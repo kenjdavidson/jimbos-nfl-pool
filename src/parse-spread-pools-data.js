@@ -241,16 +241,17 @@ module.exports = function (eleventyConfig) {
    * @returns {PlayerRank}
    */
   function standings(worksheet, rules) {
-    logger.info(`processing standings from worksheet`);
+    logger.info(`Processing standings from worksheet`);
 
     let standings = [];
     let cell = addressToXlsx(rules.standings[0]);
     let player;
-    while ((player = worksheet[xlsxToKey(cell)]) !== undefined) {
+    while ((player = worksheet[xlsxToKey(cell)]) !== undefined) {      
       const position = worksheet[xlsxToKey({ c: cell.c - 1, r: cell.r })];
       const points = worksheet[xlsxToKey({ c: cell.c + 1, r: cell.r })];
       const parsedPlayer = player.v.match(PLAYER_REG);
 
+      logger.info(`Processing player ${parsedPlayer.toString()}`);
       standings.push({
         id: slugify(parsedPlayer[1]),
         name: parsedPlayer[1],
