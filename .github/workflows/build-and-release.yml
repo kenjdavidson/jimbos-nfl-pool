@@ -4,10 +4,10 @@ on:
   push:
     branches: 
       - main
-  #schedule:
+  schedule:
     # Runs every 3 hours thurs-tues during football seasons
-    #- cron: '45 17,20,23 * JAN,SEP,OCT,NOV,DEC 0,1,4,5,6'
-    #- cron: '45 1,5 * JAN,SEP,OCT,NOV,DEC 1,2,5'
+    - cron: '45 17,20,23 * JAN,SEP,OCT,NOV,DEC 0,1,4,5,6'
+    - cron: '45 1,5 * JAN,SEP,OCT,NOV,DEC 1,2,5'
 jobs:
   build-and-release:
     runs-on: ubuntu-latest    
