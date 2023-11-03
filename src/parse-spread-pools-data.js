@@ -2,9 +2,26 @@ const XLSX = require("xlsx");
 const ESPN = require("./api/espn");
 const { slugify } = require("./filters/player");
 
-const PLAYER_REG = /^([^\(]+)(\([\d\.]+\)+)?$/i;
+/**
+ * Player expression matches two groups:
+ * - the first group is everything up to the first bracket
+ * - the second group is everything within the brackets
+ */
+const PLAYER_REG = /^\s*([^\(]+)(\([\d\.]+\)+)?\s*$/i;
+
+/**
+ * Game expression
+ */
 const GAMES_REG = /^([A-Z\. ]+)(-[\d\s\/]+)([A-Z\. ]+)$/i;
+
+/**
+ * Point expression is currently unused
+ */
 const POINTS_REG = /^([\d+])\s?pts.?$/i;
+
+/**
+ * Score expression
+ */
 const SCORE_REGEX = /^(\d+)\s*(1\/2)?$/i;
 
 module.exports = function (eleventyConfig) {
@@ -251,6 +268,7 @@ module.exports = function (eleventyConfig) {
       const points = worksheet[xlsxToKey({ c: cell.c + 1, r: cell.r })];
       const parsedPlayer = player.v.match(PLAYER_REG);
 
+      logger.info(`Processing player ${JSON.stringify(player)}`);
       logger.info(`Processing player ${parsedPlayer.toString()}`);
       standings.push({
         id: slugify(parsedPlayer[1]),
