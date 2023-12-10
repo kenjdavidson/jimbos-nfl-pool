@@ -33,7 +33,7 @@ module.exports = function (eleventyConfig) {
     const worksheet = workbook.Sheets["Sheet1"];
     const title = contents.split("/").slice(-1)[0].replace(".xlsx", "");
 
-    logger.info(`Processing XLSX data file ${contents}`);
+    logger.info(`Processing XLSX data file ${title}`);
     const data = {
       type: "spread_pool",
       title,
@@ -71,6 +71,7 @@ module.exports = function (eleventyConfig) {
       }))
       .reduce((p, c) => ({ ...p, [c.team]: c.score }), {});
 
+    logger.debug(`applying team scores`, teamScores);
     data.games.forEach((game) => applyTeamScore(teamScores, game));
   }
 
@@ -268,7 +269,6 @@ module.exports = function (eleventyConfig) {
       const points = worksheet[xlsxToKey({ c: cell.c + 1, r: cell.r })];
       const parsedPlayer = player.v.match(PLAYER_REG);
 
-      logger.info(`Processing player ${JSON.stringify(player)}`);
       logger.info(`Processing player ${parsedPlayer.toString()}`);
       standings.push({
         id: slugify(parsedPlayer[1]),
