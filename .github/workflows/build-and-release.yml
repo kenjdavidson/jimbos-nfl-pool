@@ -5,12 +5,9 @@ on:
     branches: 
       - main
   schedule:
-    # Thursday Football
-    - cron: '59 18-23 * JAN,SEP,OCT,NOV,DEC 4'
-    # Sunday Football
-    - cron: '59 13-23 * JAN,SEP,OCT,NOV,DEC 0'
-    # Monday Football
-    - cron: '59 18-23 * JAN,SEP,OCT,NOV,DEC 1'
+    # Football season, fuck this being UTC I'm not doing the math
+    - cron: '59 */2 * JAN,SEP,OCT,NOV,DEC 0,1,4'
+    - cron: '59 0,2,3,4 * JAN,SEP,OCT,NOV,DEC 2,5'
 jobs:
   build-and-release:
     runs-on: ubuntu-latest    
