@@ -1,5 +1,4 @@
 const parsingRules = require('./xlsx-parsing-rules.json');
-const parseSpreadPoolFile = require('./src/parse-spread-pools-data');
 const loadSpreadPoolsData = require('./src/load-spread-pools-data');
 const spreadPoolsCollection = require('./src/collections/spread-pools-collection');
 const eleventyNavigationPlugin = require('@11ty/eleventy-navigation');
@@ -35,12 +34,6 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addFilter("playerUrl", playerFilters.playerUrl);
   eleventyConfig.addFilter("weekUrl", playerFilters.weekUrl);
   eleventyConfig.addFilter("ordinal", ordinalFilter);
-
-  // Custom extentions
-  eleventyConfig.addDataExtension("xlsx", {
-    parser: parseSpreadPoolFile(eleventyConfig),
-    read: false
-  });
 
   // Collection
   eleventyConfig.addCollection("spread_pool", spreadPoolsCollection);

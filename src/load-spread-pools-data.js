@@ -34,7 +34,7 @@ module.exports = function (eleventyConfig) {
   const rules = eleventyConfig.globalData.xlsxParsingRules;
 
   return async () => {
-    const dataDir = path.join(process.cwd(), "data");
+    const dataDir = path.join(process.cwd(), "content", "_data");
     const allData = {};
 
     if (!fs.existsSync(dataDir)) {

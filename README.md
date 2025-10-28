@@ -26,10 +26,10 @@ $> npm run dev
 
 ## Data Organization
 
-Pool data is organized by year in the `data/{year}/` directory structure:
+Pool data is organized by year in the `content/_data/{year}/` directory structure:
 
 ```
-data/
+content/_data/
 └── 2024/
     ├── NFL 2024 week 1.xlsx
     ├── NFL 2024 week 4.xlsx
@@ -41,7 +41,7 @@ data/
 
 To add data for a new week or year:
 
-1. Create the appropriate year directory if it doesn't exist: `data/{year}/`
+1. Create the appropriate year directory if it doesn't exist: `content/_data/{year}/`
 2. Add your Excel files following the naming convention: `NFL {YEAR} week {WEEK}.xlsx`
 3. The site will automatically detect and process all Excel files in year directories
 
