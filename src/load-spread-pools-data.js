@@ -1,8 +1,8 @@
-const fs = require('fs');
-const path = require('path');
-const XLSX = require('xlsx');
-const ESPN = require('./api/espn');
-const { slugify } = require('./filters/player');
+const fs = require("fs");
+const path = require("path");
+const XLSX = require("xlsx");
+const ESPN = require("./api/espn");
+const { slugify } = require("./filters/player");
 
 /**
  * Player expression matches two groups:
@@ -34,7 +34,7 @@ module.exports = function (eleventyConfig) {
   const rules = eleventyConfig.globalData.xlsxParsingRules;
 
   return async () => {
-    const dataDir = path.join(process.cwd(), 'data');
+    const dataDir = path.join(process.cwd(), "data");
     const allData = {};
 
     if (!fs.existsSync(dataDir)) {
@@ -43,33 +43,35 @@ module.exports = function (eleventyConfig) {
     }
 
     // Read all year directories
-    const years = fs.readdirSync(dataDir).filter(file => {
+    const years = fs.readdirSync(dataDir).filter((file) => {
       const yearPath = path.join(dataDir, file);
       return fs.statSync(yearPath).isDirectory() && /^\d{4}$/.test(file);
     });
 
-    logger.info(`Found ${years.length} year(s): ${years.join(', ')}`);
+    logger.info(`Found ${years.length} year(s): ${years.join(", ")}`);
 
     // Process each year
     for (const year of years) {
       const yearPath = path.join(dataDir, year);
-      const xlsxFiles = fs.readdirSync(yearPath).filter(file => file.endsWith('.xlsx'));
+      const xlsxFiles = fs
+        .readdirSync(yearPath)
+        .filter((file) => file.endsWith(".xlsx"));
 
       logger.info(`Processing ${xlsxFiles.length} files for year ${year}`);
 
       for (const file of xlsxFiles) {
         const filePath = path.join(yearPath, file);
-        const title = file.replace('.xlsx', '');
-        const week = Number.parseInt(title.split(' ').slice(-1)[0]);
+        const title = file.replace(".xlsx", "");
+        const week = Number.parseInt(title.split(" ").slice(-1)[0]);
 
         logger.info(`Processing file: ${file}`);
 
         try {
           const workbook = XLSX.readFile(filePath);
-          const worksheet = workbook.Sheets['Sheet1'];
+          const worksheet = workbook.Sheets["Sheet1"];
 
           const data = {
-            type: 'spread_pool',
+            type: "spread_pool",
             title,
             year: Number.parseInt(year),
             week,
@@ -97,7 +99,9 @@ module.exports = function (eleventyConfig) {
    * Attempts to process game results
    */
   async function processGameResults(data, logger) {
-    logger.info(`Processing game results for week ${data.week}, year ${data.year}`);
+    logger.info(
+      `Processing game results for week ${data.week}, year ${data.year}`
+    );
 
     try {
       const scoreboard = await ESPN.getScoreboard(data.week);
@@ -114,7 +118,9 @@ module.exports = function (eleventyConfig) {
       logger.debug(`applying team scores`, teamScores);
       data.games.forEach((game) => applyTeamScore(teamScores, game));
     } catch (error) {
-      logger.warn(`Could not fetch ESPN data for week ${data.week}: ${error.message}`);
+      logger.warn(
+        `Could not fetch ESPN data for week ${data.week}: ${error.message}`
+      );
     }
   }
 
@@ -194,14 +200,14 @@ module.exports = function (eleventyConfig) {
       let pickCell = worksheet[xlsxToKey(cell)];
       if (pickCell === undefined) {
         undefinedCount++;
-      } else if (pickCell.t == 'n' || SCORE_REGEX.test(pickCell.v)) {
-        let score = pickCell.t === 'n' ? pickCell.v : convertScore(pickCell.v);
+      } else if (pickCell.t == "n" || SCORE_REGEX.test(pickCell.v)) {
+        let score = pickCell.t === "n" ? pickCell.v : convertScore(pickCell.v);
         points.push(score);
       } else {
         undefinedCount = 0;
         picks.push({
-          team: pickCell.v.replace('**', ''),
-          threePoint: pickCell.v.includes('**'),
+          team: pickCell.v.replace("**", ""),
+          threePoint: pickCell.v.includes("**"),
         });
       }
 
@@ -269,7 +275,7 @@ module.exports = function (eleventyConfig) {
   }
 
   function convertScore(score) {
-    return score && Number.parseFloat(score.replace(/\s?1\/2/g, '.5'));
+    return score && Number.parseFloat(score.replace(/\s?1\/2/g, ".5"));
   }
 
   /**
@@ -315,7 +321,7 @@ function tu(value) {
  * Converts a standard Excel address "A:1" to the XSLX { c: 0, r: 0 }.
  */
 function addressToXlsx(address) {
-  const cell = address.split(':');
+  const cell = address.split(":");
   return {
     c: cell[0].charCodeAt() - 65,
     r: Number(cell[1]) - 1,
@@ -326,7 +332,7 @@ function addressToXlsx(address) {
  * Converts a standard address "A:1" to value "A1".
  */
 function addressToKey(address) {
-  const cell = address.split(':');
+  const cell = address.split(":");
   return `${cell[0]}${cell[1]}`;
 }
 

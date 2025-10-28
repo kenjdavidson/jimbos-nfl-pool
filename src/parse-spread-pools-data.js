@@ -101,7 +101,8 @@ module.exports = function (eleventyConfig) {
 
       data.games.forEach((game, j) => {
         if (
-          game.completed && data.playerPicks[i].picks[j].team === data.games[j].winningTeam
+          game.completed &&
+          data.playerPicks[i].picks[j].team === data.games[j].winningTeam
         ) {
           playerPick.picks[j].covered = true;
           playerPick.points += data.playerPicks[i].picks[j].threePoint ? 3 : 1;
@@ -264,7 +265,7 @@ module.exports = function (eleventyConfig) {
     let standings = [];
     let cell = addressToXlsx(rules.standings[0]);
     let player;
-    while ((player = worksheet[xlsxToKey(cell)]) !== undefined) {      
+    while ((player = worksheet[xlsxToKey(cell)]) !== undefined) {
       const position = worksheet[xlsxToKey({ c: cell.c - 1, r: cell.r })];
       const points = worksheet[xlsxToKey({ c: cell.c + 1, r: cell.r })];
       const parsedPlayer = player.v.match(PLAYER_REG);
