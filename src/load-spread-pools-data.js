@@ -62,7 +62,7 @@ module.exports = function (eleventyConfig) {
       for (const file of xlsxFiles) {
         const filePath = path.join(yearPath, file);
         const title = file.replace(".xlsx", "");
-        const week = Number.parseInt(title.split(" ").slice(-1)[0]);
+        const week = Number.parseInt(title.split(" ").slice(-1)[0], 10);
 
         logger.info(`Processing file: ${file}`);
 
@@ -73,7 +73,7 @@ module.exports = function (eleventyConfig) {
           const data = {
             type: "spread_pool",
             title,
-            year: Number.parseInt(year),
+            year: Number.parseInt(year, 10),
             week,
             games: games(worksheet, rules, logger),
             standings: standings(worksheet, rules, logger),
@@ -111,7 +111,7 @@ module.exports = function (eleventyConfig) {
         .flatMap((c) => c.competitors)
         .map((c) => ({
           team: c.team.abbreviation,
-          score: Number.parseInt(c.score),
+          score: Number.parseInt(c.score, 10),
         }))
         .reduce((p, c) => ({ ...p, [c.team]: c.score }), {});
 
