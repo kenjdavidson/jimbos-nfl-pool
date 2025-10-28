@@ -57,15 +57,19 @@ permalink: "week/{{ week.year }}/{{ week.week }}/"
   
   yearSelect.addEventListener('change', () => {
     updateWeeks();
-    const year = yearSelect.value;
-    const week = weekSelect.value;
-    window.location.href = `{{ '/week/' | url }}${year}/${week}/`;
+    const year = parseInt(yearSelect.value, 10);
+    const week = parseInt(weekSelect.value, 10);
+    if (!isNaN(year) && !isNaN(week)) {
+      window.location.href = `{{ '/week/' | url }}${year}/${week}/`;
+    }
   });
   
   weekSelect.addEventListener('change', () => {
-    const year = yearSelect.value;
-    const week = weekSelect.value;
-    window.location.href = `{{ '/week/' | url }}${year}/${week}/`;
+    const year = parseInt(yearSelect.value, 10);
+    const week = parseInt(weekSelect.value, 10);
+    if (!isNaN(year) && !isNaN(week)) {
+      window.location.href = `{{ '/week/' | url }}${year}/${week}/`;
+    }
   });
   
   // Initialize on page load
