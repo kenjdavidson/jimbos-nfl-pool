@@ -7,7 +7,7 @@ const slugOpts = {
 };
 
 const playerUrl = (player) => `/players/${slugify(player.id, slugOpts)}`;
-const weekUrl = (week) => `/week/${week.week}`;
+const weekUrl = (week) => `/week/${week.year}/${week.week}`;
 const threePoint = (value) => (value ? "**" : "");
 const slugifyOpts = (value) => slugify(value, slugOpts);
 

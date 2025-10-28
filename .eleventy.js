@@ -1,5 +1,6 @@
 const parsingRules = require('./xlsx-parsing-rules.json');
 const parseSpreadPoolFile = require('./src/parse-spread-pools-data');
+const loadSpreadPoolsData = require('./src/load-spread-pools-data');
 const spreadPoolsCollection = require('./src/collections/spread-pools-collection');
 const eleventyNavigationPlugin = require('@11ty/eleventy-navigation');
 const classIfMatch = require('./src/filters/class-if-match');
@@ -24,6 +25,7 @@ module.exports = function(eleventyConfig) {
 
   // Global data - there's got to be a better way
   eleventyConfig.addGlobalData("xlsxParsingRules", parsingRules);
+  eleventyConfig.addGlobalData("spreadPoolData", loadSpreadPoolsData(eleventyConfig));
 
   // Filters
   eleventyConfig.addFilter("toJson", jsonFilters.toJson);
