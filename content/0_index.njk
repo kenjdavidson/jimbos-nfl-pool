@@ -55,7 +55,7 @@ permalink: "/"
   weekSelect.addEventListener('change', () => {
     const year = yearSelect.value;
     const week = weekSelect.value;
-    window.location.href = `/week/${year}/${week}/`;
+    window.location.href = `{{ '/week/' | url }}${year}/${week}/`;
   });
   
   // Initialize on page load

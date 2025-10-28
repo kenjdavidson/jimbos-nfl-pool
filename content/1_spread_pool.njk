@@ -7,6 +7,71 @@ pagination:
 permalink: "week/{{ week.year }}/{{ week.week }}/"
 ---
 
+{% set allWeeks = collections.spread_pool | sort(true, false, 'year') | sort(true, false, 'week') %}
+{% set years = [] %}
+{% for pool in allWeeks %}
+  {% if pool.year not in years %}
+    {% set years = (years.push(pool.year), years) %}
+  {% endif %}
+{% endfor %}
+
+<div class="flex flex-row gap-4 mb-4">
+  <div>
+    <label for="year-select" class="block text-sm font-medium mb-1">Year:</label>
+    <select id="year-select" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-slate-700">
+      {% for year in years | reverse %}
+      <option value="{{ year }}" {% if year == week.year %}selected{% endif %}>{{ year }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label for="week-select" class="block text-sm font-medium mb-1">Week:</label>
+    <select id="week-select" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-slate-700">
+    </select>
+  </div>
+</div>
+
+<script>
+  // Populate weeks based on selected year
+  const spreadPoolData = {{ allWeeks | toJson | safe }};
+  const currentYear = {{ week.year }};
+  const currentWeek = {{ week.week }};
+  const yearSelect = document.getElementById('year-select');
+  const weekSelect = document.getElementById('week-select');
+  
+  function updateWeeks() {
+    const selectedYear = parseInt(yearSelect.value);
+    const weeks = spreadPoolData.filter(pool => pool.year === selectedYear);
+    
+    weekSelect.innerHTML = '';
+    weeks.sort((a, b) => b.week - a.week).forEach(pool => {
+      const option = document.createElement('option');
+      option.value = pool.week;
+      option.textContent = `Week ${pool.week}`;
+      if (pool.year === currentYear && pool.week === currentWeek) {
+        option.selected = true;
+      }
+      weekSelect.appendChild(option);
+    });
+  }
+  
+  yearSelect.addEventListener('change', () => {
+    updateWeeks();
+    const year = yearSelect.value;
+    const week = weekSelect.value;
+    window.location.href = `{{ '/week/' | url }}${year}/${week}/`;
+  });
+  
+  weekSelect.addEventListener('change', () => {
+    const year = yearSelect.value;
+    const week = weekSelect.value;
+    window.location.href = `{{ '/week/' | url }}${year}/${week}/`;
+  });
+  
+  // Initialize on page load
+  updateWeeks();
+</script>
+
 <h1>{{ week.name }}</h1>
 
 <div class="w-full flex flex-col lg:flex-row py-4">
