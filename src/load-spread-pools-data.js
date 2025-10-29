@@ -167,10 +167,30 @@ module.exports = function (eleventyConfig) {
     const startStandingsCell = addressToXlsx(rules.standings[0]);
     const maxGames = startStandingsCell.r - startGamesCell.r;
 
+    // Helper: if the configured start column is empty (some sheets move the second
+    // block one column right), try to find the actual first non-empty column within
+    // a small search window to the right.
+    function findActualStartColumn(worksheet, startCell, maxOffset = 6) {
+      for (let offset = 0; offset <= maxOffset; offset++) {
+        const probe = { c: startCell.c + offset, r: startCell.r };
+        const cell = worksheet[xlsxToKey(probe)];
+        if (cell && cell.v !== undefined && String(cell.v).trim() !== "") {
+          return probe;
+        }
+      }
+      return startCell;
+    }
+
     rules.playerPicks.forEach((startRule) => {
       let startCell = addressToXlsx(startRule);
+
+      // If the configured start column is empty, try to locate the actual start
+      startCell = findActualStartColumn(worksheet, startCell, 8);
+
       let playerName;
 
+      // Iterate across columns starting at the discovered column until we hit an
+      // empty header cell (undefined)
       do {
         let cellKey = xlsxToKey(startCell);
         playerName = worksheet[cellKey];
@@ -200,15 +220,33 @@ module.exports = function (eleventyConfig) {
       let pickCell = worksheet[xlsxToKey(cell)];
       if (pickCell === undefined) {
         undefinedCount++;
-      } else if (pickCell.t == "n" || SCORE_REGEX.test(pickCell.v)) {
-        let score = pickCell.t === "n" ? pickCell.v : convertScore(pickCell.v);
-        points.push(score);
       } else {
-        undefinedCount = 0;
-        picks.push({
-          team: pickCell.v.replace("**", ""),
-          threePoint: pickCell.v.includes("**"),
-        });
+        // Some spreadsheets encode the tiebreak/points as strings like "*10*".
+        // Treat cells that are numeric or wrapped in single asterisks as numeric points,
+        // not as team picks. Also accept numbers and fractional scores matched by SCORE_REGEX.
+        const rawVal = pickCell.v;
+        const rawStr = rawVal !== undefined && rawVal !== null ? String(rawVal).trim() : "";
+        const starNumberMatch = /^\*?\s*(\d+(?:\.\d+)?)(?:\s*\*)?$/.test(rawStr);
+        const isNumericCell = pickCell.t === "n" || SCORE_REGEX.test(rawStr) || starNumberMatch;
+
+        if (isNumericCell) {
+          // Normalize numeric formats like "*10*" or "10 1/2" into a number
+          let score;
+          if (pickCell.t === "n") {
+            score = pickCell.v;
+          } else {
+            // remove surrounding asterisks and whitespace, then convert fractions like 1/2
+            const cleaned = rawStr.replace(/\*/g, "").trim();
+            score = convertScore(cleaned);
+          }
+          points.push(score);
+        } else {
+          undefinedCount = 0;
+          picks.push({
+            team: rawStr.replace("**", ""),
+            threePoint: rawStr.includes("**"),
+          });
+        }
       }
 
       cell = { c: cell.c, r: ++cell.r };
@@ -221,15 +259,44 @@ module.exports = function (eleventyConfig) {
   }
 
   /**
+   * Detect the start column for the games block by probing nearby columns for
+   * a cell that matches GAMES_REG. Returns an object with startCell and
+   * maxCell for consumers.
+   */
+  function detectGamesStartColumn(worksheet, rules, logger, maxOffset = 8, probeRows = 20) {
+    const startCell = addressToXlsx(rules.games[0]);
+    const maxCell = addressToXlsx(rules.standings[0]);
+
+    for (let offset = 0; offset <= maxOffset; offset++) {
+      const probeCol = startCell.c + offset;
+      for (let r = startCell.r; r < startCell.r + probeRows && r < maxCell.r; r++) {
+        const probeKey = xlsxToKey({ c: probeCol, r });
+        const probeCell = worksheet[probeKey];
+        if (probeCell && typeof probeCell.v === 'string' && GAMES_REG.test(probeCell.v)) {
+          logger.debug(`Detected games column at ${String.fromCharCode(65 + probeCol)} (offset ${offset}) by matching GAMES_REG on row ${r + 1}`);
+          return { startCell: { c: probeCol, r: startCell.r }, maxCell };
+        }
+      }
+    }
+
+    // Fallback to configured addresses
+    return { startCell, maxCell };
+  }
+
+  /**
    * Games are located in the top right portion of the sheet.
    */
   function games(worksheet, rules, logger) {
     logger.debug(`Processing current week games/spread.`);
-
     let games = [];
-    let cell = addressToXlsx(rules.games[0]);
-    let maxCell = addressToXlsx(rules.standings[0]);
+    // detect the games start column (may shift between files/years)
+    const detected = detectGamesStartColumn(worksheet, rules, logger);
+    let cell = detected.startCell;
+    let maxCell = detected.maxCell;
     let undefinedCount = 0;
+
+    // Attempt to locate the true start column for games in case sheets shifted columns
+    cell = cell || addressToXlsx(rules.games[0]);
     while (undefinedCount < 2 && cell.r < maxCell.r) {
       let gameCell = worksheet[xlsxToKey(cell)];
 
@@ -285,19 +352,78 @@ module.exports = function (eleventyConfig) {
     logger.info(`Processing standings from worksheet`);
 
     let standings = [];
-    let cell = addressToXlsx(rules.standings[0]);
+    // Use the same columns detected for games. If detection fails, fall back
+    // to the configured standings address.
+    const detected = detectGamesStartColumn(worksheet, rules, logger);
+    // If detection found a start column, use that column; otherwise use the
+    // configured standings cell column.
+    const configuredStandings = addressToXlsx(rules.standings[0]);
+    let cell = configuredStandings;
+    if (detected && detected.startCell) {
+      // We want to find the row that contains the "Standings" header and then
+      // start parsing player rows below it. Search a small window starting at
+      // the configured standings row downwards to locate the header.
+      const searchStartRow = Math.max(configuredStandings.r - 2, 0);
+      const searchEndRow = Math.min(configuredStandings.r + 40, detected.maxCell.r || configuredStandings.r + 40);
+      let foundRow = null;
+      for (let r = searchStartRow; r <= searchEndRow; r++) {
+        const probeKey = xlsxToKey({ c: detected.startCell.c, r });
+        const probeCell = worksheet[probeKey];
+        if (probeCell && typeof probeCell.v === 'string' && /\bStandings\b/i.test(probeCell.v)) {
+          logger.debug(`Found Standings header at ${probeKey} (row ${r + 1})`);
+          foundRow = r;
+          break;
+        }
+      }
+
+      // If we found the header, start at the next row in the detected column.
+      if (foundRow !== null) {
+        cell = { c: detected.startCell.c, r: foundRow + 1 };
+      } else {
+        // Otherwise fall back to using the detected column at the configured row
+        cell = { c: detected.startCell.c, r: configuredStandings.r };
+      }
+
+      // If the first row after the header is a summary line like "after week X",
+      // skip it. This avoids adding the "after week X" row as a player.
+      try {
+        const firstKey = xlsxToKey(cell);
+        const firstCell = worksheet[firstKey];
+        if (firstCell && typeof firstCell.v === 'string' && /\bafter\s+week\b/i.test(firstCell.v)) {
+          logger.debug(`Skipping summary row '${firstCell.v}' at ${firstKey}`);
+          cell = { c: cell.c, r: cell.r + 1 };
+        }
+      } catch (e) {
+        // if anything goes wrong probing the cell, continue parsing normally
+        logger.debug(`Error while probing for summary row: ${e.message}`);
+      }
+    }
     let player;
     while ((player = worksheet[xlsxToKey(cell)]) !== undefined) {
       const position = worksheet[xlsxToKey({ c: cell.c - 1, r: cell.r })];
       const points = worksheet[xlsxToKey({ c: cell.c + 1, r: cell.r })];
-      const parsedPlayer = player.v.match(PLAYER_REG);
+      // Some cells may contain non-string values (numbers, dates, etc.). Coerce to string
+      // before running the PLAYER_REG match to avoid TypeErrors like "player.v.match is not a function".
+      let rawPlayer = player.v;
+      if (rawPlayer === undefined || rawPlayer === null) {
+        logger.warn(`Empty player cell at ${xlsxToKey(cell)}; stopping standings parse.`);
+        break;
+      }
+      if (typeof rawPlayer !== "string") rawPlayer = String(rawPlayer);
+
+      const parsedPlayer = rawPlayer.match(PLAYER_REG);
+      if (!parsedPlayer) {
+        logger.warn(`Unable to parse player name "${rawPlayer}" at ${xlsxToKey(cell)}; skipping.`);
+        cell = { c: cell.c, r: cell.r + 1 };
+        continue;
+      }
 
       logger.info(`Processing player ${parsedPlayer.toString()}`);
       standings.push({
         id: slugify(parsedPlayer[1]),
         name: parsedPlayer[1],
-        position: position.v,
-        points: points.v,
+        position: position && position.v,
+        points: points && points.v,
         wins: Number.parseFloat(
           (parsedPlayer[2] && parsedPlayer[2].slice(1, -1)) || 0
         ),
