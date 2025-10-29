@@ -9,12 +9,11 @@ module.exports = function (content, outputPath) {
         collapseInlineTagWhitespace: true,
         collapseBooleanAttributes: true,
       });
-  
+
       return minified;
     } catch (err) {
       console.log(err);
     }
-
   }
 
   return content;

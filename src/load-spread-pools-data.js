@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const XLSX = require("xlsx");
 const ESPN = require("./api/espn");
 const { slugify } = require("./filters/player");
@@ -24,55 +26,102 @@ const POINTS_REG = /^([\d+])\s?pts.?$/i;
  */
 const SCORE_REGEX = /^(\d+)\s*(1\/2)?$/i;
 
+/**
+ * Loads all spread pool data from the data/{year}/ directory structure
+ */
 module.exports = function (eleventyConfig) {
   const logger = eleventyConfig.logger || console;
   const rules = eleventyConfig.globalData.xlsxParsingRules;
 
-  return async (contents) => {
-    const workbook = XLSX.readFile(contents);
-    const worksheet = workbook.Sheets["Sheet1"];
-    const title = contents.split("/").slice(-1)[0].replace(".xlsx", "");
+  return async () => {
+    const dataDir = path.join(process.cwd(), "content", "_data");
+    const allData = {};
 
-    logger.info(`Processing XLSX data file ${title}`);
-    const data = {
-      type: "spread_pool",
-      title,
-      week: Number.parseInt(title.split(" ").splice(-1)[0]),
-      games: games(worksheet, rules),
-      standings: standings(worksheet, rules),
-      playerPicks: playerPicks(worksheet, rules),
-    };
+    if (!fs.existsSync(dataDir)) {
+      logger.warn(`Data directory ${dataDir} does not exist`);
+      return allData;
+    }
 
-    await processGameResults(data);
-    processPlayerPicks(data);
-    return data;
+    // Read all year directories
+    const years = fs.readdirSync(dataDir).filter((file) => {
+      const yearPath = path.join(dataDir, file);
+      return fs.statSync(yearPath).isDirectory() && /^\d{4}$/.test(file);
+    });
+
+    logger.info(`Found ${years.length} year(s): ${years.join(", ")}`);
+
+    // Process each year
+    for (const year of years) {
+      const yearPath = path.join(dataDir, year);
+      const xlsxFiles = fs
+        .readdirSync(yearPath)
+        .filter((file) => file.endsWith(".xlsx"));
+
+      logger.info(`Processing ${xlsxFiles.length} files for year ${year}`);
+
+      for (const file of xlsxFiles) {
+        const filePath = path.join(yearPath, file);
+        const title = file.replace(".xlsx", "");
+        const week = Number.parseInt(title.split(" ").slice(-1)[0], 10);
+
+        logger.info(`Processing file: ${file}`);
+
+        try {
+          const workbook = XLSX.readFile(filePath);
+          const worksheet = workbook.Sheets["Sheet1"];
+
+          const data = {
+            type: "spread_pool",
+            title,
+            year: Number.parseInt(year, 10),
+            week,
+            games: games(worksheet, rules, logger),
+            standings: standings(worksheet, rules, logger),
+            playerPicks: playerPicks(worksheet, rules, logger),
+          };
+
+          await processGameResults(data, logger);
+          processPlayerPicks(data, logger);
+
+          // Store with a unique key
+          const key = `${year}_week_${week}`;
+          allData[key] = data;
+        } catch (error) {
+          logger.error(`Error processing file ${file}:`, error);
+        }
+      }
+    }
+
+    return allData;
   };
 
   /**
-   * Attempts to process game results, this happens only if there are no current results (we can assume that if the first
-   * game has results, the whole file has results).  This will make a request to some api (espn by default) and apply
-   * the currently available results to the game.  This is the worst performant function, it would be better if there
-   * was consistency between the input and inbound (espn) data, but without controlling the project this is the
-   * best I could do.
-   *
-   * @param {SpreadPoolData} data
+   * Attempts to process game results
    */
-  async function processGameResults(data) {
-    logger.info(`Processing game results for week ${data.week}`);
+  async function processGameResults(data, logger) {
+    logger.info(
+      `Processing game results for week ${data.week}, year ${data.year}`
+    );
 
-    const scoreboard = await ESPN.getScoreboard(data.week);
-    const teamScores = scoreboard.events
-      .map((event) => event.competitions[0])
-      .filter((c) => c.status.type.completed)
-      .flatMap((c) => c.competitors)
-      .map((c) => ({
-        team: c.team.abbreviation,
-        score: Number.parseInt(c.score),
-      }))
-      .reduce((p, c) => ({ ...p, [c.team]: c.score }), {});
+    try {
+      const scoreboard = await ESPN.getScoreboard(data.week);
+      const teamScores = scoreboard.events
+        .map((event) => event.competitions[0])
+        .filter((c) => c.status.type.completed)
+        .flatMap((c) => c.competitors)
+        .map((c) => ({
+          team: c.team.abbreviation,
+          score: Number.parseInt(c.score, 10),
+        }))
+        .reduce((p, c) => ({ ...p, [c.team]: c.score }), {});
 
-    logger.debug(`applying team scores`, teamScores);
-    data.games.forEach((game) => applyTeamScore(teamScores, game));
+      logger.debug(`applying team scores`, teamScores);
+      data.games.forEach((game) => applyTeamScore(teamScores, game));
+    } catch (error) {
+      logger.warn(
+        `Could not fetch ESPN data for week ${data.week}: ${error.message}`
+      );
+    }
   }
 
   function applyTeamScore(teamScores, game) {
@@ -81,7 +130,6 @@ module.exports = function (eleventyConfig) {
     game.underdogScore =
       teamScores[ESPN.ABBREVIATION_MAP[game.underdogTeam][0]];
 
-    // TODO: clean this up with a class
     if (game.favoriteScore != undefined && !!game.underdogScore != undefined) {
       game.covered = game.underdogScore - game.favoriteScore < game.spread;
       game.winningTeam = game.covered ? game.favoriteTeam : game.underdogTeam;
@@ -92,10 +140,8 @@ module.exports = function (eleventyConfig) {
 
   /**
    * Go through player picks and mark wins/counts for any games that are provided.
-   *
-   * @param {SpreadPoolData} data
    */
-  function processPlayerPicks(data) {
+  function processPlayerPicks(data, logger) {
     data.playerPicks.forEach((playerPick, i) => {
       playerPick.points = 0;
 
@@ -112,15 +158,9 @@ module.exports = function (eleventyConfig) {
   }
 
   /**
-   * Player picks are on the left side of the sheet.  There are generally two sections of picks
-   * that span from the start column to the first blank.  May need to find a better way to manage
-   * this, but for the time being it should be safe.
-   *
-   * @param {import("xlsx").Sheet} worksheet
-   * @param {ParsingRules} rules
-   * @return {PlayerPick[]}
+   * Player picks are on the left side of the sheet.
    */
-  function playerPicks(worksheet, rules) {
+  function playerPicks(worksheet, rules, logger) {
     let playerPicks = [];
 
     const startGamesCell = addressToXlsx(rules.games[0]);
@@ -181,19 +221,9 @@ module.exports = function (eleventyConfig) {
   }
 
   /**
-   * Games are located in the top right portion of the sheet, taikng up three columns:
-   * - Favorite score
-   * - Teams and spread
-   * - Underdog score
-   *
-   * The winning team is calculated by comparing `underdog score - favorite score <= spread`.  Another
-   * method to determine winner is whether the favorite/underdog score is <b> or <red>.
-   *
-   * @param {Sheet} worksheet
-   * @param {ParsingRules} rules
-   * @return {GameResult[]}
+   * Games are located in the top right portion of the sheet.
    */
-  function games(worksheet, rules) {
+  function games(worksheet, rules, logger) {
     logger.debug(`Processing current week games/spread.`);
 
     let games = [];
@@ -221,7 +251,6 @@ module.exports = function (eleventyConfig) {
           spread: convertScore(tu(parsedGame[2])),
         };
 
-        // TODO: clean this up with a class
         if (
           game.favoriteScore != undefined &&
           !!game.underdogScore != undefined
@@ -250,16 +279,9 @@ module.exports = function (eleventyConfig) {
   }
 
   /**
-   * Standings are located in the lower right portion of the Sheet, taking up three columns:
-   * - Position (ordinal w/ ties)
-   * - Name (including number of wins)
-   * - Points
-   *
-   * @param {Sheet} worksheet
-   * @param {ParsingRules} rules
-   * @returns {PlayerRank}
+   * Standings are located in the lower right portion of the Sheet.
    */
-  function standings(worksheet, rules) {
+  function standings(worksheet, rules, logger) {
     logger.info(`Processing standings from worksheet`);
 
     let standings = [];
@@ -297,9 +319,6 @@ function tu(value) {
 
 /**
  * Converts a standard Excel address "A:1" to the XSLX { c: 0, r: 0 }.
- *
- * @param {address} cellString
- * @return {XlsxCell}
  */
 function addressToXlsx(address) {
   const cell = address.split(":");
@@ -311,9 +330,6 @@ function addressToXlsx(address) {
 
 /**
  * Converts a standard address "A:1" to value "A1".
- *
- * @param {string} address
- * @returns {string}
  */
 function addressToKey(address) {
   const cell = address.split(":");
@@ -322,9 +338,6 @@ function addressToKey(address) {
 
 /**
  * Converts XLSX `{ c: C, r: R }` to value "CR".
- *
- * @param {XlsxCell} xlsx
- * @returns {string}
  */
 function xlsxToKey(xlsx) {
   return `${String.fromCharCode(65 + xlsx.c)}${xlsx.r + 1}`;

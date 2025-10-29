@@ -18,14 +18,36 @@
   <body class="w-full h-full bg-white dark:bg-slate-800 prose prose-headings dark:prose-invert mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2">
 
     <header class="bread-crumbs shrink-0 grow-1">
-      <nav class="flex justify-between content-center">
-        <ul class="list-none pl-0 mx-3 text-xl md:text-2xl xl:text-3xl flex flex-row justify-start flex-wrap align-middle">
-          <li class="p-2 list-none inline-block"><a href="{{ '/' | url }}" class="no-underline font-bold"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></a></li>
-          {% for week in collections.spread_pool | sort(false, true, 'week') %}
-          <li class="p-2 list-none inline-block"><a href="{{ ('/week/' + week.week) | url }}" class="no-underline font-light">{{ week.week }}</a></li>
-          {% endfor %}
+  <nav class="flex justify-between items-center content-center">
+        {# Build a year/week dropdown here instead of listing each week in the nav #}
+        {% set spreadPool = collections.spread_pool | sort(true, false, 'year') | sort(true, false, 'week') %}
+        {% set latestWeek = spreadPool | first %}
+  <ul class="list-none pl-0 mx-3 text-lg md:text-xl xl:text-xl flex flex-row justify-start flex-wrap items-center">
+          <li class="p-2 list-none inline-flex items-center">
+            <a href="{{ '/' | url }}" class="no-underline font-bold"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg></a>
+          </li>
+
+          <li class="p-2 list-none inline-flex items-center">
+            <label for="year-select" class="sr-only">Year:</label>
+            <select id="year-select" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-slate-700">
+              {% set years = [] %}
+              {% for pool in spreadPool %}
+                {% if pool.year not in years %}
+                  {% set years = (years.push(pool.year), years) %}
+                {% endif %}
+              {% endfor %}
+              {% for year in years | reverse %}
+              <option value="{{ year }}" {% if year == latestWeek.year %}selected{% endif %}>{{ year }}</option>
+              {% endfor %}
+            </select>
+          </li>
+
+          <li class="p-2 list-none inline-flex items-center">
+            <label for="week-select" class="sr-only">Week:</label>
+            <select id="week-select" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-slate-700"></select>
+          </li>
         </ul>
-        <div class="list-none pl-0 mx-3 text-lg flex flex-row justify-start align-middle">
+        <div class="list-none pl-0 mx-3 text-lg flex flex-row justify-start items-center">
           <button data-action="dark-mode#toggle">
             <svg width="24px" data-dark-mode-target="lightIcon"
               class="fill-gray-800 hover:fill-sky-500"
@@ -45,6 +67,101 @@
         </div>
       </nav>
     </header>
+    <script>
+      // Populate year/week dropdowns in the header
+      (function() {
+        try {
+          const spreadPoolData = {{ spreadPool | toJson | safe }};
+          const latestYear = {{ latestWeek.year }};
+          const latestWeekNum = {{ latestWeek.week }};
+
+          const yearSelect = document.getElementById('year-select');
+          const weekSelect = document.getElementById('week-select');
+
+          function updateWeeks() {
+            const selectedYear = parseInt(yearSelect.value, 10);
+            const weeks = spreadPoolData.filter(pool => pool.year === selectedYear);
+
+            weekSelect.innerHTML = '';
+
+            // Add a 'Standings' option to go to the year's standings page
+            const standingsOption = document.createElement('option');
+            standingsOption.value = 'standings';
+            standingsOption.textContent = 'Standings';
+            weekSelect.appendChild(standingsOption);
+
+            weeks.sort((a, b) => b.week - a.week).forEach(pool => {
+              const option = document.createElement('option');
+              option.value = pool.week;
+              option.textContent = `Week ${pool.week}`;
+              weekSelect.appendChild(option);
+            });
+          }
+
+          yearSelect.addEventListener('change', () => {
+            updateWeeks();
+            // after repopulating, trigger navigation based on the newly selected option
+            const year = parseInt(yearSelect.value, 10);
+            const weekVal = weekSelect.value;
+            if (weekVal === 'standings') {
+              if (!isNaN(year)) window.location.href = `/${year}/`;
+              return;
+            }
+            const week = parseInt(weekVal, 10);
+            if (!isNaN(year) && !isNaN(week)) window.location.href = `/${year}/week/${week}/`;
+          });
+
+          weekSelect.addEventListener('change', () => {
+            const year = parseInt(yearSelect.value, 10);
+            const weekVal = weekSelect.value;
+            if (weekVal === 'standings') {
+              if (!isNaN(year)) window.location.href = `/${year}/`;
+              return;
+            }
+            const week = parseInt(weekVal, 10);
+            if (!isNaN(year) && !isNaN(week)) window.location.href = `/${year}/week/${week}/`;
+          });
+
+          // Determine current page (year or year/week) so we can select the correct options
+          let currentPath = null;
+          try { currentPath = "{{ page.url }}"; } catch (e) { currentPath = null; }
+
+          let currentYear = null;
+          let currentWeek = null; // number or 'standings'
+          if (currentPath) {
+            // remove leading/trailing slashes and split
+            const parts = currentPath.replace(/^\//, '').replace(/\/$/, '').split('/').filter(Boolean);
+            if (parts.length === 1 && /^\d{4}$/.test(parts[0])) {
+              currentYear = parseInt(parts[0], 10);
+              currentWeek = 'standings';
+            } else if (parts.length >= 3 && /^\d{4}$/.test(parts[0]) && parts[1] === 'week' && /^\d+$/.test(parts[2])) {
+              currentYear = parseInt(parts[0], 10);
+              currentWeek = parseInt(parts[2], 10);
+            }
+          }
+
+          // Initialize selects: prefer current page if available, otherwise default to latest
+          if (currentYear) {
+            // set year select, then populate weeks for that year
+            yearSelect.value = String(currentYear);
+            updateWeeks();
+            if (currentWeek === 'standings') {
+              weekSelect.value = 'standings';
+            } else if (typeof currentWeek === 'number') {
+              weekSelect.value = String(currentWeek);
+            }
+          } else {
+            // No current page info; populate using latest year
+            updateWeeks();
+            // leave defaults (server renders latest year selected)
+          }
+        } catch (e) {
+          // If something goes wrong (collections missing during some build steps), silently fail
+          // so the rest of the layout still renders.
+          console.warn('Year/week dropdowns could not be initialized:', e);
+        }
+      })();
+    </script>
     
     <main> 
       <div class="w-full w-max-full pt-8 pb-6 overflow-hidden">

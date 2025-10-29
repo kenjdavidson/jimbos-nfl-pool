@@ -17,6 +17,7 @@ module.exports = function (collectionsApi) {
       console.debug(`Processing player ${playerPick.id}`);
       players[playerPick.id].playerPicks.push({
         ...playerPick,
+        year: weeklyPool.year,
         week: weeklyPool.week,
         title: weeklyPool.title,
         picks: combined,
