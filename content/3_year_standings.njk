@@ -1,23 +1,17 @@
 ---
 layout: layout.njk
-title: Jimbo's NFL Pools
-permalink: "/"
+pagination:
+  data: collections.spread_years
+  size: 1
+  alias: yearData
+permalink: "{{ yearData.year }}/"
 ---
 
-{% set spreadPool = collections.spread_pool | sort(true, false, 'year') | sort(true, false, 'week') %}
-{% set latestWeek = spreadPool | first %}
-{% set years = [] %}
-{% for pool in spreadPool %}
-  {% if pool.year not in years %}
-    {% set years = (years.push(pool.year), years) %}
-  {% endif %}
-{% endfor %}
-
-{# Year/week dropdowns moved to the header layout. #}
+{% set latestWeek = yearData.latestWeek %}
 
 <h1 class="text-4xl font-bold tracking-tight">Spread Pool</h1>
 
-<h2 class="text-lg font-medium mt-2">Standings: {{ latestWeek.year }} Week {{ latestWeek.week }}</h2>
+<h2 class="text-lg font-medium text-gray-700 dark:text-gray-300 mt-2">Standings: {{ yearData.year }} Week {{ latestWeek.week }}</h2>
 
 <div class="w-full flex flex-col lg:flex-row py-4">
     <article class="px-2 lg:basis-9/12">

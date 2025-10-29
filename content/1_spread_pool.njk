@@ -4,10 +4,13 @@ pagination:
   data: collections.spread_pool
   size: 1
   alias: week
-permalink: "week/{{ week.week }}/"
+permalink: "{{ week.year }}/week/{{ week.week }}/"
 ---
 
-<h1>{{ week.name }}</h1>
+{% set allWeeks = collections.spread_pool | sort(true, false, 'year') | sort(true, false, 'week') %}
+{# Dropdowns removed from per-week pages — use the header controls instead #}
+
+<h1 class="text-2xl font-bold">{{ week.year }} Week {{ week.week }} Picks</h1>
 
 <div class="w-full flex flex-col lg:flex-row py-4">
 
