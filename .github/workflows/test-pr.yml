@@ -55,13 +55,40 @@ jobs:
             exit 1
           fi
           
-          # Test spread pool pages (checking available weeks)
+          # Test year standings pages (new URL scheme includes years)
+          echo ""
+          echo "Testing year standings pages..."
+          YEARS_FOUND=0
+          for year in 2024 2025; do
+            if curl -f -s "$BASE_URL/$year/" > /dev/null 2>&1; then
+              echo "✓ Year $year standings page loaded successfully"
+              YEARS_FOUND=$((YEARS_FOUND + 1))
+            fi
+          done
+          
+          if [ $YEARS_FOUND -eq 0 ]; then
+            echo "⚠ WARNING: No year standings pages found"
+          else
+            echo "Found $YEARS_FOUND year standings pages"
+          fi
+          
+          # Test spread pool week pages with year-based URLs (new URL scheme: /YEAR/week/WEEK/)
           echo ""
           echo "Testing spread pool week pages..."
           WEEKS_FOUND=0
-          for week in 1 2 3 4 5 6 7 8 9 10; do
-            if curl -f -s "$BASE_URL/week/$week/" > /dev/null 2>&1; then
-              echo "✓ Week $week page loaded successfully"
+          
+          # Test 2024 weeks
+          for week in 1 4 5 6; do
+            if curl -f -s "$BASE_URL/2024/week/$week/" > /dev/null 2>&1; then
+              echo "✓ 2024 Week $week page loaded successfully"
+              WEEKS_FOUND=$((WEEKS_FOUND + 1))
+            fi
+          done
+          
+          # Test 2025 weeks
+          for week in 6 7 8; do
+            if curl -f -s "$BASE_URL/2025/week/$week/" > /dev/null 2>&1; then
+              echo "✓ 2025 Week $week page loaded successfully"
               WEEKS_FOUND=$((WEEKS_FOUND + 1))
             fi
           done
