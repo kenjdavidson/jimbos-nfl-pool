@@ -75,6 +75,11 @@
           const latestYear = {{ latestWeek.year }};
           const latestWeekNum = {{ latestWeek.week }};
 
+          // Eleventy-provided, path-prefixed root for the site. Use the url filter so the pathPrefix is applied.
+          // Normalize to remove any trailing slash so building URLs is consistent.
+          const ELEVENTY_BASE = "{{ '/' | url | safe }}";
+          const BASE = (typeof ELEVENTY_BASE === 'string' ? ELEVENTY_BASE.replace(/\/$/, '') : '');
+
           const yearSelect = document.getElementById('year-select');
           const weekSelect = document.getElementById('week-select');
 
@@ -104,27 +109,33 @@
             const year = parseInt(yearSelect.value, 10);
             const weekVal = weekSelect.value;
             if (weekVal === 'standings') {
-              if (!isNaN(year)) window.location.href = `/${year}/`;
+              if (!isNaN(year)) window.location.href = `${BASE}/${year}/`;
               return;
             }
             const week = parseInt(weekVal, 10);
-            if (!isNaN(year) && !isNaN(week)) window.location.href = `/${year}/week/${week}/`;
+            if (!isNaN(year) && !isNaN(week)) window.location.href = `${BASE}/${year}/week/${week}/`;
           });
 
           weekSelect.addEventListener('change', () => {
             const year = parseInt(yearSelect.value, 10);
             const weekVal = weekSelect.value;
             if (weekVal === 'standings') {
-              if (!isNaN(year)) window.location.href = `/${year}/`;
+              if (!isNaN(year)) window.location.href = `${BASE}/${year}/`;
               return;
             }
             const week = parseInt(weekVal, 10);
-            if (!isNaN(year) && !isNaN(week)) window.location.href = `/${year}/week/${week}/`;
+            if (!isNaN(year) && !isNaN(week)) window.location.href = `${BASE}/${year}/week/${week}/`;
           });
 
           // Determine current page (year or year/week) so we can select the correct options
           let currentPath = null;
-          try { currentPath = "{{ page.url }}"; } catch (e) { currentPath = null; }
+          try {
+            // Use the url filter so page url includes the pathPrefix, then strip the base we just computed.
+            currentPath = "{{ page.url | url | safe }}";
+            if (currentPath && BASE && currentPath.indexOf(BASE) === 0) {
+              currentPath = currentPath.slice(BASE.length);
+            }
+          } catch (e) { currentPath = null; }
 
           let currentYear = null;
           let currentWeek = null; // number or 'standings'
