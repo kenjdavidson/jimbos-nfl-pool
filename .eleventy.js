@@ -39,6 +39,29 @@ module.exports = function(eleventyConfig) {
   eleventyConfig.addCollection("spread_pool", spreadPoolsCollection);
   eleventyConfig.addCollection("players", playersCollection);
 
+  // Per-year collection derived from spread_pool
+  eleventyConfig.addCollection("spread_years", function(collectionsApi) {
+    // Reuse the spreadPoolsCollection logic to get normalized week entries
+    const spread = spreadPoolsCollection(collectionsApi) || [];
+    // Group weeks by year
+    const byYear = {};
+    spread.forEach((w) => {
+      const y = w.year;
+      if (!byYear[y]) byYear[y] = [];
+      byYear[y].push(w);
+    });
+
+    // Build array of year objects with weeks sorted desc and latestWeek
+    const years = Object.keys(byYear).map((y) => {
+      const weeks = byYear[y].sort((a, b) => b.week - a.week);
+      return { year: parseInt(y, 10), weeks, latestWeek: weeks[0] };
+    });
+
+    // Sort years descending
+    years.sort((a, b) => b.year - a.year);
+    return years;
+  });
+
   return {
     passthroughFileCopy: true,
     dir: {
