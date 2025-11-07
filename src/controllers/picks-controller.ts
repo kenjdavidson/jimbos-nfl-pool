@@ -120,7 +120,7 @@ export default class extends Controller {
   ): HTMLElement {
     const card = document.createElement("div");
     card.className =
-      "bg-gray-50 dark:bg-slate-700 rounded-lg shadow-md p-6 flex flex-col gap-4";
+      "bg-gray-50 dark:bg-slate-700 rounded-lg shadow-md p-6 flex flex-col items-stretch content-start gap-4";
     card.dataset.gameId = gameId;
 
     // Game title
