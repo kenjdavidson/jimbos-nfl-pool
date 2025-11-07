@@ -120,7 +120,7 @@ export default class extends Controller {
   ): HTMLElement {
     const card = document.createElement("div");
     card.className =
-      "bg-gray-50 dark:bg-slate-700 rounded-sm shadow-md p-4 flex flex-col items-stretch content-start gap-4";
+      "bg-gray-50 dark:bg-slate-700 rounded-lg shadow-md p-4 flex flex-col items-stretch content-start gap-4";
     card.dataset.gameId = gameId;
 
     // Game title
@@ -132,12 +132,12 @@ export default class extends Controller {
 
     // Buttons container - horizontal layout with spread in middle
     const buttonsContainer = document.createElement("div");
-    buttonsContainer.className = "flex items-stretch";
+    buttonsContainer.className = "flex items-center";
 
     // Team 1 button (away team)
     const team1Btn = document.createElement("button");
     team1Btn.className =
-      "grow px-4 py-6 bg-gray-300 dark:bg-gray-500 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-400 transition-colors font-medium text-center";
+      "grow px-4 py-3 bg-gray-300 dark:bg-gray-500 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-400 transition-colors font-medium text-center";
     team1Btn.dataset.action = "click->picks#selectTeam";
     team1Btn.dataset.gameId = gameId;
     team1Btn.dataset.team = team1;
@@ -147,13 +147,13 @@ export default class extends Controller {
     // Spread display in the middle
     const spreadDisplay = document.createElement("div");
     spreadDisplay.className =
-      "grow self-center text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap px-2";
+      "text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap px-2 text-center";
     spreadDisplay.textContent = team1Spread;
 
     // Team 2 button (home team)
     const team2Btn = document.createElement("button");
     team2Btn.className =
-      "grow px-4 py-6 bg-gray-300 dark:bg-gray-500 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-400 transition-colors font-medium text-center";
+      "grow px-4 py-3 bg-gray-300 dark:bg-gray-500 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-400 transition-colors font-medium text-center";
     team2Btn.dataset.action = "click->picks#selectTeam";
     team2Btn.dataset.gameId = gameId;
     team2Btn.dataset.team = team2;
@@ -168,18 +168,20 @@ export default class extends Controller {
     // 3-point checkbox (separate from team buttons)
     const threePointContainer = document.createElement("div");
     threePointContainer.className =
-      "flex items-center justify-center gap-3 cursor-pointer pt-2";
+      "flex items-center justify-center gap-3 pt-2";
 
     const threePointCheckbox = document.createElement("input");
     threePointCheckbox.type = "checkbox";
+    threePointCheckbox.id = `three-point-${gameId}`;
     threePointCheckbox.className =
       "w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600 cursor-pointer";
     threePointCheckbox.dataset.action = "change->picks#toggleThreePoint";
     threePointCheckbox.dataset.gameId = gameId;
 
-    const threePointLabel = document.createElement("span");
+    const threePointLabel = document.createElement("label");
+    threePointLabel.htmlFor = `three-point-${gameId}`;
     threePointLabel.className =
-      "text-base font-semibold text-gray-800 dark:text-gray-200";
+      "text-base font-semibold text-gray-800 dark:text-gray-200 cursor-pointer";
     threePointLabel.textContent = "3 Point";
 
     threePointContainer.appendChild(threePointCheckbox);
@@ -223,12 +225,14 @@ export default class extends Controller {
       "dark:text-gray-100"
     );
 
-    // Store the pick
+    // Store the pick, preserving the 3-point status
     const existingPick = this.picks.get(gameId);
+    const isThreePoint = existingPick?.isThreePoint || false;
+    
     this.picks.set(gameId, {
       team,
       spread,
-      isThreePoint: existingPick?.isThreePoint || false,
+      isThreePoint,
     });
 
     this.updateOutput();
@@ -238,18 +242,11 @@ export default class extends Controller {
     const checkbox = event.currentTarget as HTMLInputElement;
     const gameId = checkbox.dataset.gameId!;
 
-    const pick = this.picks.get(gameId);
-
-    if (!pick) {
-      // Can only mark a game as 3-point if a team has been selected
-      checkbox.checked = false;
-      return;
-    }
-
     // If checkbox is being unchecked
     if (!checkbox.checked) {
-      // Only clear the 3-point status if this was the 3-point game
-      if (pick.isThreePoint) {
+      const pick = this.picks.get(gameId);
+      // Only clear the 3-point status if this was the 3-point game and a pick exists
+      if (pick && pick.isThreePoint) {
         pick.isThreePoint = false;
         this.updateOutput();
       }
@@ -270,24 +267,51 @@ export default class extends Controller {
       }
     });
 
-    // Make this the 3-point game
-    pick.isThreePoint = true;
+    // Also uncheck all other game checkboxes that don't have picks
+    const allCheckboxes = this.gamesTarget.querySelectorAll(
+      'input[type="checkbox"]'
+    ) as NodeListOf<HTMLInputElement>;
+    allCheckboxes.forEach((cb) => {
+      if (cb !== checkbox && cb.dataset.gameId !== gameId) {
+        const id = cb.dataset.gameId!;
+        const pick = this.picks.get(id);
+        if (!pick || !pick.isThreePoint) {
+          cb.checked = false;
+        }
+      }
+    });
+
+    // Create or update the pick with 3-point flag
+    const existingPick = this.picks.get(gameId);
+    if (existingPick) {
+      existingPick.isThreePoint = true;
+    } else {
+      // Create a placeholder pick if team not selected yet
+      this.picks.set(gameId, {
+        team: "",
+        spread: "",
+        isThreePoint: true,
+      });
+    }
 
     this.updateOutput();
   }
 
   updateOutput() {
-    if (this.picks.size === 0) {
-      this.outputTarget.textContent = "No picks selected yet";
-      return;
-    }
-
     const lines: string[] = [];
 
     this.picks.forEach((pick) => {
-      const threePointSuffix = pick.isThreePoint ? "\t+3" : "";
-      lines.push(`${pick.team}\t${pick.spread}${threePointSuffix}`);
+      // Only include picks where a team has been selected
+      if (pick.team) {
+        const threePointSuffix = pick.isThreePoint ? "\t+3" : "";
+        lines.push(`${pick.team}\t${pick.spread}${threePointSuffix}`);
+      }
     });
+
+    if (lines.length === 0) {
+      this.outputTarget.textContent = "No picks selected yet";
+      return;
+    }
 
     // Add tiebreak if provided
     const tiebreak = this.tiebreakTarget.value.trim();
