@@ -51,16 +51,16 @@ export default class extends Controller {
   async loadOdds() {
     const data = await fetchESPNSpreads();
     const games = processESPNSpreads(data);
-    
+
     if (games.length === 0) {
       throw new Error("No games available for this week");
     }
 
     this.currentWeek = getWeekNumber(data);
     this.weekNumberTarget.textContent = String(this.currentWeek);
-    
+
     this.renderGames(games);
-    
+
     this.loadingTarget.classList.add("hidden");
     this.contentTarget.classList.remove("hidden");
   }
@@ -71,45 +71,105 @@ export default class extends Controller {
       {
         id: "1",
         date: "2025-01-01",
-        awayTeam: { name: "Chiefs", abbreviation: "KC", spread: "-3.5", odds: "-110" },
-        homeTeam: { name: "Ravens", abbreviation: "BAL", spread: "+3.5", odds: "-110" }
+        awayTeam: {
+          name: "Chiefs",
+          abbreviation: "KC",
+          spread: "-3.5",
+          odds: "-110",
+        },
+        homeTeam: {
+          name: "Ravens",
+          abbreviation: "BAL",
+          spread: "+3.5",
+          odds: "-110",
+        },
       },
       {
         id: "2",
         date: "2025-01-01",
-        awayTeam: { name: "Eagles", abbreviation: "PHI", spread: "-2.5", odds: "-110" },
-        homeTeam: { name: "Packers", abbreviation: "GB", spread: "+2.5", odds: "-110" }
+        awayTeam: {
+          name: "Eagles",
+          abbreviation: "PHI",
+          spread: "-2.5",
+          odds: "-110",
+        },
+        homeTeam: {
+          name: "Packers",
+          abbreviation: "GB",
+          spread: "+2.5",
+          odds: "-110",
+        },
       },
       {
         id: "3",
         date: "2025-01-01",
-        awayTeam: { name: "Vikings", abbreviation: "MIN", spread: "-1.5", odds: "-110" },
-        homeTeam: { name: "Giants", abbreviation: "NYG", spread: "+1.5", odds: "-110" }
+        awayTeam: {
+          name: "Vikings",
+          abbreviation: "MIN",
+          spread: "-1.5",
+          odds: "-110",
+        },
+        homeTeam: {
+          name: "Giants",
+          abbreviation: "NYG",
+          spread: "+1.5",
+          odds: "-110",
+        },
       },
       {
         id: "4",
         date: "2025-01-01",
-        awayTeam: { name: "Saints", abbreviation: "NO", spread: "-4.5", odds: "-110" },
-        homeTeam: { name: "Panthers", abbreviation: "CAR", spread: "+4.5", odds: "-110" }
+        awayTeam: {
+          name: "Saints",
+          abbreviation: "NO",
+          spread: "-4.5",
+          odds: "-110",
+        },
+        homeTeam: {
+          name: "Panthers",
+          abbreviation: "CAR",
+          spread: "+4.5",
+          odds: "-110",
+        },
       },
       {
         id: "5",
         date: "2025-01-01",
-        awayTeam: { name: "Dolphins", abbreviation: "MIA", spread: "-3.5", odds: "-110" },
-        homeTeam: { name: "Jaguars", abbreviation: "JAX", spread: "+3.5", odds: "-110" }
+        awayTeam: {
+          name: "Dolphins",
+          abbreviation: "MIA",
+          spread: "-3.5",
+          odds: "-110",
+        },
+        homeTeam: {
+          name: "Jaguars",
+          abbreviation: "JAX",
+          spread: "+3.5",
+          odds: "-110",
+        },
       },
       {
         id: "6",
         date: "2025-01-01",
-        awayTeam: { name: "Texans", abbreviation: "HOU", spread: "-2.5", odds: "-110" },
-        homeTeam: { name: "Colts", abbreviation: "IND", spread: "+2.5", odds: "-110" }
-      }
+        awayTeam: {
+          name: "Texans",
+          abbreviation: "HOU",
+          spread: "-2.5",
+          odds: "-110",
+        },
+        homeTeam: {
+          name: "Colts",
+          abbreviation: "IND",
+          spread: "+2.5",
+          odds: "-110",
+        },
+      },
     ];
 
     this.currentWeek = 10;
     this.weekNumberTarget.textContent = String(this.currentWeek);
     this.renderGames(mockGames);
-    
+
     this.loadingTarget.classList.add("hidden");
     this.contentTarget.classList.remove("hidden");
   }
@@ -124,16 +184,18 @@ export default class extends Controller {
 
   renderGames(games: GameDisplay[]) {
     this.gamesTarget.innerHTML = "";
-    
+
     games.forEach((game) => {
       // Parse and adjust spreads
       const homeSpread = this.adjustSpread(parseFloat(game.homeTeam.spread));
       const awaySpread = this.adjustSpread(parseFloat(game.awayTeam.spread));
-      
+
       // Format spreads with proper signs
-      const homeSpreadStr = homeSpread > 0 ? `+${homeSpread}` : String(homeSpread);
-      const awaySpreadStr = awaySpread > 0 ? `+${awaySpread}` : String(awaySpread);
-      
+      const homeSpreadStr =
+        homeSpread > 0 ? `+${homeSpread}` : String(homeSpread);
+      const awaySpreadStr =
+        awaySpread > 0 ? `+${awaySpread}` : String(awaySpread);
+
       const gameElement = this.createGameElement(
         game.id,
         game.awayTeam.abbreviation,
@@ -141,7 +203,7 @@ export default class extends Controller {
         game.homeTeam.abbreviation,
         homeSpreadStr
       );
-      
+
       this.gamesTarget.appendChild(gameElement);
     });
   }
@@ -154,22 +216,25 @@ export default class extends Controller {
     team2Spread: string
   ): HTMLElement {
     const card = document.createElement("div");
-    card.className = "bg-white dark:bg-slate-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700";
+    card.className =
+      "bg-gray-50 dark:bg-slate-700 rounded-lg shadow-md p-4 flex flex-col gap-4";
     card.dataset.gameId = gameId;
 
     // Game title
     const title = document.createElement("div");
-    title.className = "text-sm font-semibold text-gray-600 dark:text-gray-400 mb-3 text-center";
+    title.className =
+      "text-lg font-bold text-gray-800 dark:text-gray-200 text-center";
     title.textContent = `${team1} @ ${team2}`;
     card.appendChild(title);
 
     // Buttons container - horizontal layout with spread in middle
     const buttonsContainer = document.createElement("div");
-    buttonsContainer.className = "flex items-center gap-2";
+    buttonsContainer.className = "flex items-stretch justify-between gap-2";
 
     // Team 1 button (away team)
     const team1Btn = document.createElement("button");
-    team1Btn.className = "flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors font-medium text-center";
+    team1Btn.className =
+      "flex-1 px-4 py-6 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors font-medium text-center";
     team1Btn.dataset.action = "click->picks#selectTeam";
     team1Btn.dataset.gameId = gameId;
     team1Btn.dataset.team = team1;
@@ -178,12 +243,14 @@ export default class extends Controller {
 
     // Spread display in the middle
     const spreadDisplay = document.createElement("div");
-    spreadDisplay.className = "text-sm font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap";
+    spreadDisplay.className =
+      "flex items-center text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap px-2";
     spreadDisplay.textContent = team1Spread;
 
     // Team 2 button (home team)
     const team2Btn = document.createElement("button");
-    team2Btn.className = "flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors font-medium text-center";
+    team2Btn.className =
+      "flex-1 px-4 py-6 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors font-medium text-center";
     team2Btn.dataset.action = "click->picks#selectTeam";
     team2Btn.dataset.gameId = gameId;
     team2Btn.dataset.team = team2;
@@ -197,18 +264,21 @@ export default class extends Controller {
 
     // 3-point checkbox (separate from team buttons)
     const threePointContainer = document.createElement("label");
-    threePointContainer.className = "flex items-center justify-center gap-2 mt-3 cursor-pointer";
-    
+    threePointContainer.className =
+      "flex items-center justify-center gap-2 cursor-pointer";
+
     const threePointCheckbox = document.createElement("input");
     threePointCheckbox.type = "checkbox";
-    threePointCheckbox.className = "w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500 dark:border-gray-600 dark:focus:ring-orange-600 cursor-pointer";
+    threePointCheckbox.className =
+      "w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500 dark:border-gray-600 dark:focus:ring-orange-600 cursor-pointer";
     threePointCheckbox.dataset.action = "change->picks#toggleThreePoint";
     threePointCheckbox.dataset.gameId = gameId;
-    
+
     const threePointLabel = document.createElement("span");
-    threePointLabel.className = "text-sm font-medium text-gray-700 dark:text-gray-300";
+    threePointLabel.className =
+      "text-sm font-medium text-gray-700 dark:text-gray-300";
     threePointLabel.textContent = "3 Point";
-    
+
     threePointContainer.appendChild(threePointCheckbox);
     threePointContainer.appendChild(threePointLabel);
     card.appendChild(threePointContainer);
@@ -226,19 +296,29 @@ export default class extends Controller {
     const gameContainer = this.gamesTarget.querySelector(
       `[data-game-id="${gameId}"]`
     ) as HTMLElement;
-    
+
     if (!gameContainer) return;
 
-    // Remove selection from all team buttons in this game (not 3-point button)
+    // Remove selection from all team buttons in this game (restore secondary styling)
     const teamButtons = gameContainer.querySelectorAll("button[data-team]");
     teamButtons.forEach((btn) => {
-      btn.classList.remove("bg-blue-600", "dark:bg-blue-700", "text-white", "border-blue-600", "dark:border-blue-700");
-      btn.classList.add("border-gray-300", "dark:border-gray-600");
+      btn.classList.remove("bg-blue-600", "dark:bg-blue-700", "text-white");
+      btn.classList.add(
+        "bg-gray-200",
+        "dark:bg-gray-600",
+        "text-gray-700",
+        "dark:text-gray-200"
+      );
     });
 
-    // Add strong selection styling to clicked button
-    button.classList.add("bg-blue-600", "dark:bg-blue-700", "text-white", "border-blue-600", "dark:border-blue-700");
-    button.classList.remove("border-gray-300", "dark:border-gray-600");
+    // Add primary button styling to clicked button
+    button.classList.add("bg-blue-600", "dark:bg-blue-700", "text-white");
+    button.classList.remove(
+      "bg-gray-200",
+      "dark:bg-gray-600",
+      "text-gray-700",
+      "dark:text-gray-200"
+    );
 
     // Store the pick
     const existingPick = this.picks.get(gameId);
@@ -256,7 +336,7 @@ export default class extends Controller {
     const gameId = checkbox.dataset.gameId!;
 
     const pick = this.picks.get(gameId);
-    
+
     if (!pick) {
       // Can only mark a game as 3-point if a team has been selected
       checkbox.checked = false;
@@ -270,7 +350,7 @@ export default class extends Controller {
       this.updateOutput();
       return;
     }
-    
+
     // Otherwise, uncheck all other 3-point games and make this one the 3-point game
     this.picks.forEach((p, id) => {
       if (p.isThreePoint) {
@@ -284,11 +364,11 @@ export default class extends Controller {
         }
       }
     });
-    
+
     // Make this the 3-point game
     pick.isThreePoint = true;
     checkbox.checked = true;
-    
+
     this.updateOutput();
   }
 
@@ -299,7 +379,7 @@ export default class extends Controller {
     }
 
     const lines: string[] = [];
-    
+
     this.picks.forEach((pick) => {
       const threePointSuffix = pick.isThreePoint ? "\t+3" : "";
       lines.push(`${pick.team}\t${pick.spread}${threePointSuffix}`);
@@ -316,11 +396,11 @@ export default class extends Controller {
 
   async copyToClipboard() {
     const text = this.outputTarget.textContent || "";
-    
+
     try {
       await navigator.clipboard.writeText(text);
       this.copyStatusTarget.classList.remove("hidden");
-      
+
       setTimeout(() => {
         this.copyStatusTarget.classList.add("hidden");
       }, 2000);
