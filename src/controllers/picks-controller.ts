@@ -160,7 +160,7 @@ export default class extends Controller {
     // Game title
     const title = document.createElement("div");
     title.className = "text-sm font-semibold text-gray-600 dark:text-gray-400 mb-3 text-center";
-    title.textContent = `${team1} vs ${team2}`;
+    title.textContent = `${team1} @ ${team2}`;
     card.appendChild(title);
 
     // Buttons container - horizontal layout with spread in middle
@@ -207,7 +207,7 @@ export default class extends Controller {
     
     const threePointLabel = document.createElement("span");
     threePointLabel.className = "text-sm font-medium text-gray-700 dark:text-gray-300";
-    threePointLabel.textContent = "3 pt";
+    threePointLabel.textContent = "3 Point";
     
     threePointContainer.appendChild(threePointCheckbox);
     threePointContainer.appendChild(threePointLabel);
@@ -263,9 +263,15 @@ export default class extends Controller {
       return;
     }
 
-    const wasThreePoint = pick.isThreePoint;
+    // If this game was already the 3-point game, uncheck it
+    if (pick.isThreePoint) {
+      pick.isThreePoint = false;
+      checkbox.checked = false;
+      this.updateOutput();
+      return;
+    }
     
-    // First, uncheck and remove 3-point status from all games
+    // Otherwise, uncheck all other 3-point games and make this one the 3-point game
     this.picks.forEach((p, id) => {
       if (p.isThreePoint) {
         p.isThreePoint = false;
@@ -279,14 +285,9 @@ export default class extends Controller {
       }
     });
     
-    // If this wasn't already the 3-point game, make it the 3-point game
-    if (!wasThreePoint) {
-      pick.isThreePoint = true;
-      checkbox.checked = true;
-    } else {
-      // If clicking the same checkbox, just uncheck it
-      checkbox.checked = false;
-    }
+    // Make this the 3-point game
+    pick.isThreePoint = true;
+    checkbox.checked = true;
     
     this.updateOutput();
   }
