@@ -132,7 +132,7 @@ export default class extends Controller {
 
     // Buttons container - horizontal layout with spread in middle
     const buttonsContainer = document.createElement("div");
-    buttonsContainer.className = "flex items-stretch justify-evenly gap-2";
+    buttonsContainer.className = "flex items-stretch";
 
     // Team 1 button (away team)
     const team1Btn = document.createElement("button");
