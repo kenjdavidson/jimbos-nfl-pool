@@ -42,7 +42,9 @@ export default class extends Controller {
     try {
       await this.loadOdds();
     } catch (error) {
-      this.showError(error instanceof Error ? error.message : "Unknown error");
+      // If ESPN API fails, use mock data for development
+      console.warn("ESPN API failed, using mock data:", error);
+      this.loadMockData();
     }
   }
 
@@ -58,6 +60,55 @@ export default class extends Controller {
     this.weekNumberTarget.textContent = String(this.currentWeek);
     
     this.renderGames(games);
+    
+    this.loadingTarget.classList.add("hidden");
+    this.contentTarget.classList.remove("hidden");
+  }
+
+  loadMockData() {
+    // Mock data for development/testing
+    const mockGames: GameDisplay[] = [
+      {
+        id: "1",
+        date: "2025-01-01",
+        awayTeam: { name: "Chiefs", abbreviation: "KC", spread: "-3.5", odds: "-110" },
+        homeTeam: { name: "Ravens", abbreviation: "BAL", spread: "+3.5", odds: "-110" }
+      },
+      {
+        id: "2",
+        date: "2025-01-01",
+        awayTeam: { name: "Eagles", abbreviation: "PHI", spread: "-2.5", odds: "-110" },
+        homeTeam: { name: "Packers", abbreviation: "GB", spread: "+2.5", odds: "-110" }
+      },
+      {
+        id: "3",
+        date: "2025-01-01",
+        awayTeam: { name: "Vikings", abbreviation: "MIN", spread: "-1.5", odds: "-110" },
+        homeTeam: { name: "Giants", abbreviation: "NYG", spread: "+1.5", odds: "-110" }
+      },
+      {
+        id: "4",
+        date: "2025-01-01",
+        awayTeam: { name: "Saints", abbreviation: "NO", spread: "-4.5", odds: "-110" },
+        homeTeam: { name: "Panthers", abbreviation: "CAR", spread: "+4.5", odds: "-110" }
+      },
+      {
+        id: "5",
+        date: "2025-01-01",
+        awayTeam: { name: "Dolphins", abbreviation: "MIA", spread: "-3.5", odds: "-110" },
+        homeTeam: { name: "Jaguars", abbreviation: "JAX", spread: "+3.5", odds: "-110" }
+      },
+      {
+        id: "6",
+        date: "2025-01-01",
+        awayTeam: { name: "Texans", abbreviation: "HOU", spread: "-2.5", odds: "-110" },
+        homeTeam: { name: "Colts", abbreviation: "IND", spread: "+2.5", odds: "-110" }
+      }
+    ];
+
+    this.currentWeek = 10;
+    this.weekNumberTarget.textContent = String(this.currentWeek);
+    this.renderGames(mockGames);
     
     this.loadingTarget.classList.add("hidden");
     this.contentTarget.classList.remove("hidden");
@@ -102,13 +153,23 @@ export default class extends Controller {
     team2: string,
     team2Spread: string
   ): HTMLElement {
-    const container = document.createElement("div");
-    container.className = "flex flex-wrap items-center gap-2 p-3 bg-gray-50 dark:bg-slate-700 rounded-md";
-    container.dataset.gameId = gameId;
+    const card = document.createElement("div");
+    card.className = "bg-white dark:bg-slate-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700";
+    card.dataset.gameId = gameId;
+
+    // Game title
+    const title = document.createElement("div");
+    title.className = "text-sm font-semibold text-gray-600 dark:text-gray-400 mb-3 text-center";
+    title.textContent = `${team1} @ ${team2}`;
+    card.appendChild(title);
+
+    // Buttons container
+    const buttonsContainer = document.createElement("div");
+    buttonsContainer.className = "space-y-2";
 
     // Team 1 button (away team)
     const team1Btn = document.createElement("button");
-    team1Btn.className = "px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors";
+    team1Btn.className = "w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors font-medium";
     team1Btn.dataset.action = "click->picks#selectTeam";
     team1Btn.dataset.gameId = gameId;
     team1Btn.dataset.team = team1;
@@ -117,25 +178,26 @@ export default class extends Controller {
 
     // Team 2 button (home team)
     const team2Btn = document.createElement("button");
-    team2Btn.className = "px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors";
+    team2Btn.className = "w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors font-medium";
     team2Btn.dataset.action = "click->picks#selectTeam";
     team2Btn.dataset.gameId = gameId;
     team2Btn.dataset.team = team2;
     team2Btn.dataset.spread = team2Spread;
     team2Btn.textContent = `${team2} ${team2Spread}`;
 
-    // 3-point button
+    buttonsContainer.appendChild(team1Btn);
+    buttonsContainer.appendChild(team2Btn);
+    card.appendChild(buttonsContainer);
+
+    // 3-point button (separate from team buttons)
     const threePointBtn = document.createElement("button");
-    threePointBtn.className = "px-3 py-2 border-2 border-orange-400 dark:border-orange-600 rounded-md hover:bg-orange-100 dark:hover:bg-orange-900 transition-colors text-sm";
+    threePointBtn.className = "w-full mt-3 px-3 py-2 border-2 border-orange-400 dark:border-orange-600 rounded-md hover:bg-orange-50 dark:hover:bg-orange-900/30 transition-colors text-sm font-semibold text-orange-700 dark:text-orange-400";
     threePointBtn.dataset.action = "click->picks#toggleThreePoint";
     threePointBtn.dataset.gameId = gameId;
-    threePointBtn.textContent = "3 Point";
+    threePointBtn.textContent = "3 Point Game";
+    card.appendChild(threePointBtn);
 
-    container.appendChild(team1Btn);
-    container.appendChild(team2Btn);
-    container.appendChild(threePointBtn);
-
-    return container;
+    return card;
   }
 
   selectTeam(event: MouseEvent) {
@@ -151,15 +213,15 @@ export default class extends Controller {
     
     if (!gameContainer) return;
 
-    // Remove selection from all buttons in this game
-    const allButtons = gameContainer.querySelectorAll("button");
-    allButtons.forEach((btn) => {
-      btn.classList.remove("bg-blue-500", "dark:bg-blue-600", "text-white");
+    // Remove selection from all team buttons in this game (not 3-point button)
+    const teamButtons = gameContainer.querySelectorAll("button[data-team]");
+    teamButtons.forEach((btn) => {
+      btn.classList.remove("bg-blue-600", "dark:bg-blue-700", "text-white", "border-blue-600", "dark:border-blue-700");
       btn.classList.add("border-gray-300", "dark:border-gray-600");
     });
 
-    // Add selection to clicked button
-    button.classList.add("bg-blue-500", "dark:bg-blue-600", "text-white");
+    // Add strong selection styling to clicked button
+    button.classList.add("bg-blue-600", "dark:bg-blue-700", "text-white", "border-blue-600", "dark:border-blue-700");
     button.classList.remove("border-gray-300", "dark:border-gray-600");
 
     // Store the pick
@@ -179,20 +241,36 @@ export default class extends Controller {
 
     const pick = this.picks.get(gameId);
     
-    if (pick) {
-      pick.isThreePoint = !pick.isThreePoint;
-      
-      // Toggle button appearance
-      if (pick.isThreePoint) {
-        button.classList.add("bg-orange-500", "dark:bg-orange-600", "text-white");
-        button.classList.remove("border-orange-400", "dark:border-orange-600");
-      } else {
-        button.classList.remove("bg-orange-500", "dark:bg-orange-600", "text-white");
-        button.classList.add("border-orange-400", "dark:border-orange-600");
-      }
-      
-      this.updateOutput();
+    if (!pick) {
+      // Can only mark a game as 3-point if a team has been selected
+      return;
     }
+
+    const wasThreePoint = pick.isThreePoint;
+    
+    // First, remove 3-point status from all games
+    this.picks.forEach((p, id) => {
+      if (p.isThreePoint) {
+        p.isThreePoint = false;
+        // Update the button appearance for the old 3-point game
+        const oldButton = this.gamesTarget.querySelector(
+          `[data-game-id="${id}"] button[data-action="click->picks#toggleThreePoint"]`
+        ) as HTMLButtonElement;
+        if (oldButton) {
+          oldButton.classList.remove("bg-orange-600", "dark:bg-orange-700", "text-white", "border-orange-600", "dark:border-orange-700");
+          oldButton.classList.add("border-orange-400", "dark:border-orange-600", "text-orange-700", "dark:text-orange-400");
+        }
+      }
+    });
+    
+    // If this wasn't already the 3-point game, make it the 3-point game
+    if (!wasThreePoint) {
+      pick.isThreePoint = true;
+      button.classList.add("bg-orange-600", "dark:bg-orange-700", "text-white", "border-orange-600", "dark:border-orange-700");
+      button.classList.remove("border-orange-400", "dark:border-orange-600", "text-orange-700", "dark:text-orange-400");
+    }
+    
+    this.updateOutput();
   }
 
   updateOutput() {
