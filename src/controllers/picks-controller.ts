@@ -160,42 +160,58 @@ export default class extends Controller {
     // Game title
     const title = document.createElement("div");
     title.className = "text-sm font-semibold text-gray-600 dark:text-gray-400 mb-3 text-center";
-    title.textContent = `${team1} @ ${team2}`;
+    title.textContent = `${team1} vs ${team2}`;
     card.appendChild(title);
 
-    // Buttons container
+    // Buttons container - horizontal layout with spread in middle
     const buttonsContainer = document.createElement("div");
-    buttonsContainer.className = "space-y-2";
+    buttonsContainer.className = "flex items-center gap-2";
 
     // Team 1 button (away team)
     const team1Btn = document.createElement("button");
-    team1Btn.className = "w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors font-medium";
+    team1Btn.className = "flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors font-medium text-center";
     team1Btn.dataset.action = "click->picks#selectTeam";
     team1Btn.dataset.gameId = gameId;
     team1Btn.dataset.team = team1;
     team1Btn.dataset.spread = team1Spread;
-    team1Btn.textContent = `${team1} ${team1Spread}`;
+    team1Btn.textContent = team1;
+
+    // Spread display in the middle
+    const spreadDisplay = document.createElement("div");
+    spreadDisplay.className = "text-sm font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap";
+    spreadDisplay.textContent = team1Spread;
 
     // Team 2 button (home team)
     const team2Btn = document.createElement("button");
-    team2Btn.className = "w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors font-medium";
+    team2Btn.className = "flex-1 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors font-medium text-center";
     team2Btn.dataset.action = "click->picks#selectTeam";
     team2Btn.dataset.gameId = gameId;
     team2Btn.dataset.team = team2;
     team2Btn.dataset.spread = team2Spread;
-    team2Btn.textContent = `${team2} ${team2Spread}`;
+    team2Btn.textContent = team2;
 
     buttonsContainer.appendChild(team1Btn);
+    buttonsContainer.appendChild(spreadDisplay);
     buttonsContainer.appendChild(team2Btn);
     card.appendChild(buttonsContainer);
 
-    // 3-point button (separate from team buttons)
-    const threePointBtn = document.createElement("button");
-    threePointBtn.className = "w-full mt-3 px-3 py-2 border-2 border-orange-400 dark:border-orange-600 rounded-md hover:bg-orange-50 dark:hover:bg-orange-900/30 transition-colors text-sm font-semibold text-orange-700 dark:text-orange-400";
-    threePointBtn.dataset.action = "click->picks#toggleThreePoint";
-    threePointBtn.dataset.gameId = gameId;
-    threePointBtn.textContent = "3 Point Game";
-    card.appendChild(threePointBtn);
+    // 3-point checkbox (separate from team buttons)
+    const threePointContainer = document.createElement("label");
+    threePointContainer.className = "flex items-center justify-center gap-2 mt-3 cursor-pointer";
+    
+    const threePointCheckbox = document.createElement("input");
+    threePointCheckbox.type = "checkbox";
+    threePointCheckbox.className = "w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500 dark:border-gray-600 dark:focus:ring-orange-600 cursor-pointer";
+    threePointCheckbox.dataset.action = "change->picks#toggleThreePoint";
+    threePointCheckbox.dataset.gameId = gameId;
+    
+    const threePointLabel = document.createElement("span");
+    threePointLabel.className = "text-sm font-medium text-gray-700 dark:text-gray-300";
+    threePointLabel.textContent = "3 pt";
+    
+    threePointContainer.appendChild(threePointCheckbox);
+    threePointContainer.appendChild(threePointLabel);
+    card.appendChild(threePointContainer);
 
     return card;
   }
@@ -235,30 +251,30 @@ export default class extends Controller {
     this.updateOutput();
   }
 
-  toggleThreePoint(event: MouseEvent) {
-    const button = event.currentTarget as HTMLButtonElement;
-    const gameId = button.dataset.gameId!;
+  toggleThreePoint(event: Event) {
+    const checkbox = event.currentTarget as HTMLInputElement;
+    const gameId = checkbox.dataset.gameId!;
 
     const pick = this.picks.get(gameId);
     
     if (!pick) {
       // Can only mark a game as 3-point if a team has been selected
+      checkbox.checked = false;
       return;
     }
 
     const wasThreePoint = pick.isThreePoint;
     
-    // First, remove 3-point status from all games
+    // First, uncheck and remove 3-point status from all games
     this.picks.forEach((p, id) => {
       if (p.isThreePoint) {
         p.isThreePoint = false;
-        // Update the button appearance for the old 3-point game
-        const oldButton = this.gamesTarget.querySelector(
-          `[data-game-id="${id}"] button[data-action="click->picks#toggleThreePoint"]`
-        ) as HTMLButtonElement;
-        if (oldButton) {
-          oldButton.classList.remove("bg-orange-600", "dark:bg-orange-700", "text-white", "border-orange-600", "dark:border-orange-700");
-          oldButton.classList.add("border-orange-400", "dark:border-orange-600", "text-orange-700", "dark:text-orange-400");
+        // Uncheck the old 3-point checkbox
+        const oldCheckbox = this.gamesTarget.querySelector(
+          `[data-game-id="${id}"] input[type="checkbox"]`
+        ) as HTMLInputElement;
+        if (oldCheckbox) {
+          oldCheckbox.checked = false;
         }
       }
     });
@@ -266,8 +282,10 @@ export default class extends Controller {
     // If this wasn't already the 3-point game, make it the 3-point game
     if (!wasThreePoint) {
       pick.isThreePoint = true;
-      button.classList.add("bg-orange-600", "dark:bg-orange-700", "text-white", "border-orange-600", "dark:border-orange-700");
-      button.classList.remove("border-orange-400", "dark:border-orange-600", "text-orange-700", "dark:text-orange-400");
+      checkbox.checked = true;
+    } else {
+      // If clicking the same checkbox, just uncheck it
+      checkbox.checked = false;
     }
     
     this.updateOutput();
