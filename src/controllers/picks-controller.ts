@@ -120,7 +120,7 @@ export default class extends Controller {
   ): HTMLElement {
     const card = document.createElement("div");
     card.className =
-      "bg-gray-50 dark:bg-slate-700 rounded-lg shadow-md p-6 flex flex-col items-stretch content-start gap-4";
+      "bg-gray-50 dark:bg-slate-700 rounded-sm shadow-md p-4 flex flex-col items-stretch content-start gap-4";
     card.dataset.gameId = gameId;
 
     // Game title
@@ -137,7 +137,7 @@ export default class extends Controller {
     // Team 1 button (away team)
     const team1Btn = document.createElement("button");
     team1Btn.className =
-      "flex-1 px-4 py-6 bg-gray-300 dark:bg-gray-500 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-400 transition-colors font-medium text-center";
+      "grow px-4 py-6 bg-gray-300 dark:bg-gray-500 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-400 transition-colors font-medium text-center";
     team1Btn.dataset.action = "click->picks#selectTeam";
     team1Btn.dataset.gameId = gameId;
     team1Btn.dataset.team = team1;
@@ -147,13 +147,13 @@ export default class extends Controller {
     // Spread display in the middle
     const spreadDisplay = document.createElement("div");
     spreadDisplay.className =
-      "self-center text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap px-2";
+      "grow self-center text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap px-2";
     spreadDisplay.textContent = team1Spread;
 
     // Team 2 button (home team)
     const team2Btn = document.createElement("button");
     team2Btn.className =
-      "flex-1 px-4 py-6 bg-gray-300 dark:bg-gray-500 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-400 transition-colors font-medium text-center";
+      "grow px-4 py-6 bg-gray-300 dark:bg-gray-500 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-400 transition-colors font-medium text-center";
     team2Btn.dataset.action = "click->picks#selectTeam";
     team2Btn.dataset.gameId = gameId;
     team2Btn.dataset.team = team2;
@@ -166,7 +166,7 @@ export default class extends Controller {
     card.appendChild(buttonsContainer);
 
     // 3-point checkbox (separate from team buttons)
-    const threePointContainer = document.createElement("label");
+    const threePointContainer = document.createElement("div");
     threePointContainer.className =
       "flex items-center justify-center gap-3 cursor-pointer pt-2";
 
