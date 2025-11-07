@@ -47,41 +47,37 @@ export default class extends Controller {
   }
 
   async loadOdds() {
-    try {
-      const data = await fetchESPNSpreads();
-      const games = processESPNSpreads(data);
-      
-      if (games.length === 0) {
-        throw new Error("No games available for this week");
-      }
-
-      this.currentWeek = getWeekNumber(data);
-      this.weekNumberTarget.textContent = String(this.currentWeek);
-      
-      this.renderGames(games);
-      
-      this.loadingTarget.classList.add("hidden");
-      this.contentTarget.classList.remove("hidden");
-    } catch (error) {
-      throw error;
+    const data = await fetchESPNSpreads();
+    const games = processESPNSpreads(data);
+    
+    if (games.length === 0) {
+      throw new Error("No games available for this week");
     }
+
+    this.currentWeek = getWeekNumber(data);
+    this.weekNumberTarget.textContent = String(this.currentWeek);
+    
+    this.renderGames(games);
+    
+    this.loadingTarget.classList.add("hidden");
+    this.contentTarget.classList.remove("hidden");
+  }
+
+  private adjustSpread(spread: number): number {
+    // Adjust whole number spreads by subtracting 0.5
+    if (Number.isInteger(spread)) {
+      return spread > 0 ? spread - 0.5 : spread + 0.5;
+    }
+    return spread;
   }
 
   renderGames(games: GameDisplay[]) {
     this.gamesTarget.innerHTML = "";
     
     games.forEach((game) => {
-      // Parse the spread from home team (negative means home is favorite)
-      let homeSpread = parseFloat(game.homeTeam.spread);
-      let awaySpread = parseFloat(game.awayTeam.spread);
-      
-      // Adjust whole number spreads by subtracting 0.5
-      if (Number.isInteger(homeSpread)) {
-        homeSpread = homeSpread > 0 ? homeSpread - 0.5 : homeSpread + 0.5;
-      }
-      if (Number.isInteger(awaySpread)) {
-        awaySpread = awaySpread > 0 ? awaySpread - 0.5 : awaySpread + 0.5;
-      }
+      // Parse and adjust spreads
+      const homeSpread = this.adjustSpread(parseFloat(game.homeTeam.spread));
+      const awaySpread = this.adjustSpread(parseFloat(game.awayTeam.spread));
       
       // Format spreads with proper signs
       const homeSpreadStr = homeSpread > 0 ? `+${homeSpread}` : String(homeSpread);
