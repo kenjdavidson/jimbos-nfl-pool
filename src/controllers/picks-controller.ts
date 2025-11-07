@@ -246,15 +246,17 @@ export default class extends Controller {
       return;
     }
 
-    // If this game was already the 3-point game, uncheck it
-    if (pick.isThreePoint) {
-      pick.isThreePoint = false;
-      checkbox.checked = false;
-      this.updateOutput();
+    // If checkbox is being unchecked
+    if (!checkbox.checked) {
+      // Only clear the 3-point status if this was the 3-point game
+      if (pick.isThreePoint) {
+        pick.isThreePoint = false;
+        this.updateOutput();
+      }
       return;
     }
 
-    // Otherwise, uncheck all other 3-point games and make this one the 3-point game
+    // Checkbox is being checked - uncheck all other 3-point games
     this.picks.forEach((p, id) => {
       if (p.isThreePoint) {
         p.isThreePoint = false;
@@ -270,7 +272,6 @@ export default class extends Controller {
 
     // Make this the 3-point game
     pick.isThreePoint = true;
-    checkbox.checked = true;
 
     this.updateOutput();
   }
