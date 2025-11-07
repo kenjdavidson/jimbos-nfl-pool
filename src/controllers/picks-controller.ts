@@ -217,7 +217,7 @@ export default class extends Controller {
   ): HTMLElement {
     const card = document.createElement("div");
     card.className =
-      "bg-gray-50 dark:bg-slate-700 rounded-lg shadow-md p-4 flex flex-col gap-4";
+      "bg-gray-50 dark:bg-slate-700 rounded-lg shadow-md p-6 flex flex-col gap-4";
     card.dataset.gameId = gameId;
 
     // Game title
@@ -229,12 +229,12 @@ export default class extends Controller {
 
     // Buttons container - horizontal layout with spread in middle
     const buttonsContainer = document.createElement("div");
-    buttonsContainer.className = "flex items-stretch justify-between gap-2";
+    buttonsContainer.className = "flex items-stretch justify-evenly gap-2";
 
     // Team 1 button (away team)
     const team1Btn = document.createElement("button");
     team1Btn.className =
-      "flex-1 px-4 py-6 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors font-medium text-center";
+      "flex-1 px-4 py-6 bg-gray-300 dark:bg-gray-500 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-400 transition-colors font-medium text-center";
     team1Btn.dataset.action = "click->picks#selectTeam";
     team1Btn.dataset.gameId = gameId;
     team1Btn.dataset.team = team1;
@@ -250,7 +250,7 @@ export default class extends Controller {
     // Team 2 button (home team)
     const team2Btn = document.createElement("button");
     team2Btn.className =
-      "flex-1 px-4 py-6 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors font-medium text-center";
+      "flex-1 px-4 py-6 bg-gray-300 dark:bg-gray-500 text-gray-900 dark:text-gray-100 rounded-md hover:bg-gray-400 dark:hover:bg-gray-400 transition-colors font-medium text-center";
     team2Btn.dataset.action = "click->picks#selectTeam";
     team2Btn.dataset.gameId = gameId;
     team2Btn.dataset.team = team2;
@@ -265,18 +265,18 @@ export default class extends Controller {
     // 3-point checkbox (separate from team buttons)
     const threePointContainer = document.createElement("label");
     threePointContainer.className =
-      "flex items-center justify-center gap-2 cursor-pointer";
+      "flex items-center justify-center gap-3 cursor-pointer pt-2";
 
     const threePointCheckbox = document.createElement("input");
     threePointCheckbox.type = "checkbox";
     threePointCheckbox.className =
-      "w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500 dark:border-gray-600 dark:focus:ring-orange-600 cursor-pointer";
+      "w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-blue-600 cursor-pointer";
     threePointCheckbox.dataset.action = "change->picks#toggleThreePoint";
     threePointCheckbox.dataset.gameId = gameId;
 
     const threePointLabel = document.createElement("span");
     threePointLabel.className =
-      "text-sm font-medium text-gray-700 dark:text-gray-300";
+      "text-base font-semibold text-gray-800 dark:text-gray-200";
     threePointLabel.textContent = "3 Point";
 
     threePointContainer.appendChild(threePointCheckbox);
@@ -304,20 +304,20 @@ export default class extends Controller {
     teamButtons.forEach((btn) => {
       btn.classList.remove("bg-blue-600", "dark:bg-blue-700", "text-white");
       btn.classList.add(
-        "bg-gray-200",
-        "dark:bg-gray-600",
-        "text-gray-700",
-        "dark:text-gray-200"
+        "bg-gray-300",
+        "dark:bg-gray-500",
+        "text-gray-900",
+        "dark:text-gray-100"
       );
     });
 
     // Add primary button styling to clicked button
     button.classList.add("bg-blue-600", "dark:bg-blue-700", "text-white");
     button.classList.remove(
-      "bg-gray-200",
-      "dark:bg-gray-600",
-      "text-gray-700",
-      "dark:text-gray-200"
+      "bg-gray-300",
+      "dark:bg-gray-500",
+      "text-gray-900",
+      "dark:text-gray-100"
     );
 
     // Store the pick

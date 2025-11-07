@@ -225,9 +225,13 @@ module.exports = function (eleventyConfig) {
         // Treat cells that are numeric or wrapped in single asterisks as numeric points,
         // not as team picks. Also accept numbers and fractional scores matched by SCORE_REGEX.
         const rawVal = pickCell.v;
-        const rawStr = rawVal !== undefined && rawVal !== null ? String(rawVal).trim() : "";
-        const starNumberMatch = /^\*?\s*(\d+(?:\.\d+)?)(?:\s*\*)?$/.test(rawStr);
-        const isNumericCell = pickCell.t === "n" || SCORE_REGEX.test(rawStr) || starNumberMatch;
+        const rawStr =
+          rawVal !== undefined && rawVal !== null ? String(rawVal).trim() : "";
+        const starNumberMatch = /^\*?\s*(\d+(?:\.\d+)?)(?:\s*\*)?$/.test(
+          rawStr
+        );
+        const isNumericCell =
+          pickCell.t === "n" || SCORE_REGEX.test(rawStr) || starNumberMatch;
 
         if (isNumericCell) {
           // Normalize numeric formats like "*10*" or "10 1/2" into a number
@@ -263,17 +267,35 @@ module.exports = function (eleventyConfig) {
    * a cell that matches GAMES_REG. Returns an object with startCell and
    * maxCell for consumers.
    */
-  function detectGamesStartColumn(worksheet, rules, logger, maxOffset = 8, probeRows = 20) {
+  function detectGamesStartColumn(
+    worksheet,
+    rules,
+    logger,
+    maxOffset = 8,
+    probeRows = 20
+  ) {
     const startCell = addressToXlsx(rules.games[0]);
     const maxCell = addressToXlsx(rules.standings[0]);
 
     for (let offset = 0; offset <= maxOffset; offset++) {
       const probeCol = startCell.c + offset;
-      for (let r = startCell.r; r < startCell.r + probeRows && r < maxCell.r; r++) {
+      for (
+        let r = startCell.r;
+        r < startCell.r + probeRows && r < maxCell.r;
+        r++
+      ) {
         const probeKey = xlsxToKey({ c: probeCol, r });
         const probeCell = worksheet[probeKey];
-        if (probeCell && typeof probeCell.v === 'string' && GAMES_REG.test(probeCell.v)) {
-          logger.debug(`Detected games column at ${String.fromCharCode(65 + probeCol)} (offset ${offset}) by matching GAMES_REG on row ${r + 1}`);
+        if (
+          probeCell &&
+          typeof probeCell.v === "string" &&
+          GAMES_REG.test(probeCell.v)
+        ) {
+          logger.debug(
+            `Detected games column at ${String.fromCharCode(
+              65 + probeCol
+            )} (offset ${offset}) by matching GAMES_REG on row ${r + 1}`
+          );
           return { startCell: { c: probeCol, r: startCell.r }, maxCell };
         }
       }
@@ -364,12 +386,19 @@ module.exports = function (eleventyConfig) {
       // start parsing player rows below it. Search a small window starting at
       // the configured standings row downwards to locate the header.
       const searchStartRow = Math.max(configuredStandings.r - 2, 0);
-      const searchEndRow = Math.min(configuredStandings.r + 40, detected.maxCell.r || configuredStandings.r + 40);
+      const searchEndRow = Math.min(
+        configuredStandings.r + 40,
+        detected.maxCell.r || configuredStandings.r + 40
+      );
       let foundRow = null;
       for (let r = searchStartRow; r <= searchEndRow; r++) {
         const probeKey = xlsxToKey({ c: detected.startCell.c, r });
         const probeCell = worksheet[probeKey];
-        if (probeCell && typeof probeCell.v === 'string' && /\bStandings\b/i.test(probeCell.v)) {
+        if (
+          probeCell &&
+          typeof probeCell.v === "string" &&
+          /\bStandings\b/i.test(probeCell.v)
+        ) {
           logger.debug(`Found Standings header at ${probeKey} (row ${r + 1})`);
           foundRow = r;
           break;
@@ -389,7 +418,11 @@ module.exports = function (eleventyConfig) {
       try {
         const firstKey = xlsxToKey(cell);
         const firstCell = worksheet[firstKey];
-        if (firstCell && typeof firstCell.v === 'string' && /\bafter\s+week\b/i.test(firstCell.v)) {
+        if (
+          firstCell &&
+          typeof firstCell.v === "string" &&
+          /\bafter\s+week\b/i.test(firstCell.v)
+        ) {
           logger.debug(`Skipping summary row '${firstCell.v}' at ${firstKey}`);
           cell = { c: cell.c, r: cell.r + 1 };
         }
@@ -406,14 +439,20 @@ module.exports = function (eleventyConfig) {
       // before running the PLAYER_REG match to avoid TypeErrors like "player.v.match is not a function".
       let rawPlayer = player.v;
       if (rawPlayer === undefined || rawPlayer === null) {
-        logger.warn(`Empty player cell at ${xlsxToKey(cell)}; stopping standings parse.`);
+        logger.warn(
+          `Empty player cell at ${xlsxToKey(cell)}; stopping standings parse.`
+        );
         break;
       }
       if (typeof rawPlayer !== "string") rawPlayer = String(rawPlayer);
 
       const parsedPlayer = rawPlayer.match(PLAYER_REG);
       if (!parsedPlayer) {
-        logger.warn(`Unable to parse player name "${rawPlayer}" at ${xlsxToKey(cell)}; skipping.`);
+        logger.warn(
+          `Unable to parse player name "${rawPlayer}" at ${xlsxToKey(
+            cell
+          )}; skipping.`
+        );
         cell = { c: cell.c, r: cell.r + 1 };
         continue;
       }
