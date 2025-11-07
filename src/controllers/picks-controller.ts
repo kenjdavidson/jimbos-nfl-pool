@@ -1,30 +1,10 @@
 import { Controller } from "@hotwired/stimulus";
-
-interface Team {
-  id: string;
-  abbreviation: string;
-  displayName: string;
-}
-
-interface Competitor {
-  team: Team;
-}
-
-interface Odds {
-  details?: string;
-  overUnder?: number;
-}
-
-interface Competition {
-  competitors: Competitor[];
-  odds?: Odds[];
-}
-
-interface Event {
-  id: string;
-  name: string;
-  competitions: Competition[];
-}
+import {
+  fetchESPNSpreads,
+  processESPNSpreads,
+  getWeekNumber,
+  type GameDisplay,
+} from "../utils/espn-spreads";
 
 interface PickSelection {
   team: string;
@@ -68,145 +48,51 @@ export default class extends Controller {
 
   async loadOdds() {
     try {
-      const response = await fetch(
-        "https://site.web.api.espn.com/apis/v3/sports/football/nfl/odds"
-      );
+      const data = await fetchESPNSpreads();
+      const games = processESPNSpreads(data);
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (!data.items || data.items.length === 0) {
-        throw new Error("No odds data available");
+      if (games.length === 0) {
+        throw new Error("No games available for this week");
       }
 
-      this.currentWeek = data.week?.number || data.items[0]?.week || 1;
+      this.currentWeek = getWeekNumber(data);
       this.weekNumberTarget.textContent = String(this.currentWeek);
       
-      this.renderGames(data.items);
+      this.renderGames(games);
       
       this.loadingTarget.classList.add("hidden");
       this.contentTarget.classList.remove("hidden");
     } catch (error) {
-      // If API fails, use sample data for demonstration
-      console.warn("ESPN API failed, using sample data:", error);
-      this.loadSampleData();
+      throw error;
     }
   }
 
-  loadSampleData() {
-    // Sample data for demonstration when ESPN API is unavailable
-    this.currentWeek = 10;
-    this.weekNumberTarget.textContent = String(this.currentWeek);
-    
-    const sampleGames = [
-      { id: "1", team1: "ATL", team2: "IND", spread: "-6" },
-      { id: "2", team1: "NYG", team2: "CHI", spread: "-4" },
-      { id: "3", team1: "BUF", team2: "MIA", spread: "-10" },
-      { id: "4", team1: "KC", team2: "DEN", spread: "-7.5" },
-      { id: "5", team1: "SF", team2: "SEA", spread: "-5.5" },
-      { id: "6", team1: "DAL", team2: "PHI", spread: "-3" },
-    ];
-    
+  renderGames(games: GameDisplay[]) {
     this.gamesTarget.innerHTML = "";
     
-    sampleGames.forEach((game) => {
-      let spreadValue = parseFloat(game.spread);
+    games.forEach((game) => {
+      // Parse the spread from home team (negative means home is favorite)
+      let homeSpread = parseFloat(game.homeTeam.spread);
+      let awaySpread = parseFloat(game.awayTeam.spread);
       
       // Adjust whole number spreads by subtracting 0.5
-      if (Number.isInteger(spreadValue)) {
-        spreadValue = spreadValue > 0 ? spreadValue - 0.5 : spreadValue + 0.5;
+      if (Number.isInteger(homeSpread)) {
+        homeSpread = homeSpread > 0 ? homeSpread - 0.5 : homeSpread + 0.5;
+      }
+      if (Number.isInteger(awaySpread)) {
+        awaySpread = awaySpread > 0 ? awaySpread - 0.5 : awaySpread + 0.5;
       }
       
-      const favoriteSpread = spreadValue > 0 ? String(spreadValue) : String(spreadValue);
-      const underdogSpread = spreadValue > 0 ? String(-spreadValue) : `+${Math.abs(spreadValue)}`;
-      
-      const favoriteTeam = game.team2;
-      const underdogTeam = game.team1;
+      // Format spreads with proper signs
+      const homeSpreadStr = homeSpread > 0 ? `+${homeSpread}` : String(homeSpread);
+      const awaySpreadStr = awaySpread > 0 ? `+${awaySpread}` : String(awaySpread);
       
       const gameElement = this.createGameElement(
         game.id,
-        underdogTeam,
-        favoriteTeam,
-        favoriteSpread
-      );
-      
-      this.gamesTarget.appendChild(gameElement);
-    });
-    
-    this.loadingTarget.classList.add("hidden");
-    this.contentTarget.classList.remove("hidden");
-  }
-
-  renderGames(events: Event[]) {
-    this.gamesTarget.innerHTML = "";
-    
-    events.forEach((event) => {
-      if (!event.competitions || event.competitions.length === 0) {
-        return;
-      }
-
-      const competition = event.competitions[0];
-      const competitors = competition.competitors;
-      
-      if (competitors.length < 2) {
-        return;
-      }
-
-      const team1 = competitors[0].team;
-      const team2 = competitors[1].team;
-      
-      // Get odds/spread information
-      let spread = "EVEN";
-      let favoriteTeam = team1.abbreviation;
-      let underdogTeam = team2.abbreviation;
-      
-      if (competition.odds && competition.odds.length > 0) {
-        const oddsDetails = competition.odds[0].details;
-        if (oddsDetails) {
-          // Parse odds like "ATL -6.5" or "IND +3"
-          const spreadMatch = oddsDetails.match(/([-+]?\d+\.?\d*)/);
-          if (spreadMatch) {
-            let spreadValue = parseFloat(spreadMatch[1]);
-            
-            // Adjust whole number spreads by subtracting 0.5
-            if (Number.isInteger(spreadValue)) {
-              spreadValue = spreadValue > 0 ? spreadValue - 0.5 : spreadValue + 0.5;
-            }
-            
-            spread = spreadValue > 0 ? `+${spreadValue}` : String(spreadValue);
-            
-            // Determine favorite and underdog
-            if (oddsDetails.includes(team1.abbreviation)) {
-              if (spreadValue < 0) {
-                favoriteTeam = team1.abbreviation;
-                underdogTeam = team2.abbreviation;
-              } else {
-                favoriteTeam = team2.abbreviation;
-                underdogTeam = team1.abbreviation;
-                spread = spreadValue > 0 ? String(-spreadValue) : `+${Math.abs(spreadValue)}`;
-              }
-            } else {
-              if (spreadValue < 0) {
-                favoriteTeam = team2.abbreviation;
-                underdogTeam = team1.abbreviation;
-              } else {
-                favoriteTeam = team1.abbreviation;
-                underdogTeam = team2.abbreviation;
-                spread = spreadValue > 0 ? String(-spreadValue) : `+${Math.abs(spreadValue)}`;
-              }
-            }
-          }
-        }
-      }
-
-      const gameElement = this.createGameElement(
-        event.id,
-        favoriteTeam,
-        underdogTeam,
-        spread
+        game.awayTeam.abbreviation,
+        awaySpreadStr,
+        game.homeTeam.abbreviation,
+        homeSpreadStr
       );
       
       this.gamesTarget.appendChild(gameElement);
@@ -216,40 +102,31 @@ export default class extends Controller {
   createGameElement(
     gameId: string,
     team1: string,
+    team1Spread: string,
     team2: string,
-    spread: string
+    team2Spread: string
   ): HTMLElement {
     const container = document.createElement("div");
     container.className = "flex flex-wrap items-center gap-2 p-3 bg-gray-50 dark:bg-slate-700 rounded-md";
     container.dataset.gameId = gameId;
 
-    // Team 1 button (underdog with + spread)
+    // Team 1 button (away team)
     const team1Btn = document.createElement("button");
     team1Btn.className = "px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors";
     team1Btn.dataset.action = "click->picks#selectTeam";
     team1Btn.dataset.gameId = gameId;
     team1Btn.dataset.team = team1;
-    
-    // Calculate underdog spread (opposite of favorite)
-    const underdogSpread = spread.startsWith("-") 
-      ? `+${spread.substring(1)}` 
-      : spread.startsWith("+") 
-      ? `-${spread.substring(1)}`
-      : spread === "EVEN"
-      ? "EVEN"
-      : `+${Math.abs(parseFloat(spread))}`;
-    
-    team1Btn.dataset.spread = underdogSpread;
-    team1Btn.textContent = `${team1} ${underdogSpread}`;
+    team1Btn.dataset.spread = team1Spread;
+    team1Btn.textContent = `${team1} ${team1Spread}`;
 
-    // Team 2 button (favorite with - spread)
+    // Team 2 button (home team)
     const team2Btn = document.createElement("button");
     team2Btn.className = "px-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors";
     team2Btn.dataset.action = "click->picks#selectTeam";
     team2Btn.dataset.gameId = gameId;
     team2Btn.dataset.team = team2;
-    team2Btn.dataset.spread = spread;
-    team2Btn.textContent = `${team2} ${spread}`;
+    team2Btn.dataset.spread = team2Spread;
+    team2Btn.textContent = `${team2} ${team2Spread}`;
 
     // 3-point button
     const threePointBtn = document.createElement("button");
