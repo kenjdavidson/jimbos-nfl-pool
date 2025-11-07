@@ -244,7 +244,7 @@ export default class extends Controller {
     // Spread display in the middle
     const spreadDisplay = document.createElement("div");
     spreadDisplay.className =
-      "flex items-center text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap px-2";
+      "self-center text-base font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap px-2";
     spreadDisplay.textContent = team1Spread;
 
     // Team 2 button (home team)
