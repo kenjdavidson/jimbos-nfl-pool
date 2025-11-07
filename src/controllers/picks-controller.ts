@@ -3,6 +3,7 @@ import {
   fetchESPNSpreads,
   processESPNSpreads,
   getWeekNumber,
+  getMockGameData,
   type GameDisplay,
 } from "../utils/espn-spreads";
 
@@ -66,109 +67,11 @@ export default class extends Controller {
   }
 
   loadMockData() {
-    // Mock data for development/testing
-    const mockGames: GameDisplay[] = [
-      {
-        id: "1",
-        date: "2025-01-01",
-        awayTeam: {
-          name: "Chiefs",
-          abbreviation: "KC",
-          spread: "-3.5",
-          odds: "-110",
-        },
-        homeTeam: {
-          name: "Ravens",
-          abbreviation: "BAL",
-          spread: "+3.5",
-          odds: "-110",
-        },
-      },
-      {
-        id: "2",
-        date: "2025-01-01",
-        awayTeam: {
-          name: "Eagles",
-          abbreviation: "PHI",
-          spread: "-2.5",
-          odds: "-110",
-        },
-        homeTeam: {
-          name: "Packers",
-          abbreviation: "GB",
-          spread: "+2.5",
-          odds: "-110",
-        },
-      },
-      {
-        id: "3",
-        date: "2025-01-01",
-        awayTeam: {
-          name: "Vikings",
-          abbreviation: "MIN",
-          spread: "-1.5",
-          odds: "-110",
-        },
-        homeTeam: {
-          name: "Giants",
-          abbreviation: "NYG",
-          spread: "+1.5",
-          odds: "-110",
-        },
-      },
-      {
-        id: "4",
-        date: "2025-01-01",
-        awayTeam: {
-          name: "Saints",
-          abbreviation: "NO",
-          spread: "-4.5",
-          odds: "-110",
-        },
-        homeTeam: {
-          name: "Panthers",
-          abbreviation: "CAR",
-          spread: "+4.5",
-          odds: "-110",
-        },
-      },
-      {
-        id: "5",
-        date: "2025-01-01",
-        awayTeam: {
-          name: "Dolphins",
-          abbreviation: "MIA",
-          spread: "-3.5",
-          odds: "-110",
-        },
-        homeTeam: {
-          name: "Jaguars",
-          abbreviation: "JAX",
-          spread: "+3.5",
-          odds: "-110",
-        },
-      },
-      {
-        id: "6",
-        date: "2025-01-01",
-        awayTeam: {
-          name: "Texans",
-          abbreviation: "HOU",
-          spread: "-2.5",
-          odds: "-110",
-        },
-        homeTeam: {
-          name: "Colts",
-          abbreviation: "IND",
-          spread: "+2.5",
-          odds: "-110",
-        },
-      },
-    ];
+    const { games, weekNumber } = getMockGameData();
 
-    this.currentWeek = 10;
+    this.currentWeek = weekNumber;
     this.weekNumberTarget.textContent = String(this.currentWeek);
-    this.renderGames(mockGames);
+    this.renderGames(games);
 
     this.loadingTarget.classList.add("hidden");
     this.contentTarget.classList.remove("hidden");
