@@ -46,6 +46,14 @@
             <label for="week-select" class="sr-only">Week:</label>
             <select id="week-select" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-slate-700"></select>
           </li>
+
+          <li class="p-2 list-none inline-flex items-center">
+            <a href="{{ '/picks/' | url }}" class="no-underline" title="Generate Picks">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+            </a>
+          </li>
         </ul>
         <div class="list-none pl-0 mx-3 text-lg flex flex-row justify-start items-center">
           <button data-action="dark-mode#toggle">
