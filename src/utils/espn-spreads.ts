@@ -70,43 +70,47 @@ export interface GameDisplay {
 export function processESPNSpreads(data: ESPNSpreadsData): GameDisplay[] {
   const games: GameDisplay[] = [];
 
-  data.lines.forEach((week) => {
-    week.events.forEach((event) => {
-      event.competitions.forEach((competition) => {
-        // Find home and away teams
-        const homeCompetitor = competition.competitors.find(
-          (c) => c.homeAway === "home"
-        );
-        const awayCompetitor = competition.competitors.find(
-          (c) => c.homeAway === "away"
-        );
+  // Only process the first week's events to avoid showing games from multiple weeks
+  const firstWeek = data.lines[0];
+  if (!firstWeek) {
+    return games;
+  }
 
-        if (
-          !homeCompetitor ||
-          !awayCompetitor ||
-          !competition.odds[0]?.pointSpread
-        ) {
-          return; // Skip if missing data
-        }
+  firstWeek.events.forEach((event) => {
+    event.competitions.forEach((competition) => {
+      // Find home and away teams
+      const homeCompetitor = competition.competitors.find(
+        (c) => c.homeAway === "home"
+      );
+      const awayCompetitor = competition.competitors.find(
+        (c) => c.homeAway === "away"
+      );
 
-        const spread = competition.odds[0].pointSpread;
+      if (
+        !homeCompetitor ||
+        !awayCompetitor ||
+        !competition.odds[0]?.pointSpread
+      ) {
+        return; // Skip if missing data
+      }
 
-        games.push({
-          id: competition.id,
-          date: competition.date,
-          homeTeam: {
-            name: homeCompetitor.team.shortDisplayName,
-            abbreviation: homeCompetitor.team.abbreviation,
-            spread: spread.home.close.line,
-            odds: spread.home.close.odds,
-          },
-          awayTeam: {
-            name: awayCompetitor.team.shortDisplayName,
-            abbreviation: awayCompetitor.team.abbreviation,
-            spread: spread.away.close.line,
-            odds: spread.away.close.odds,
-          },
-        });
+      const spread = competition.odds[0].pointSpread;
+
+      games.push({
+        id: competition.id,
+        date: competition.date,
+        homeTeam: {
+          name: homeCompetitor.team.shortDisplayName,
+          abbreviation: homeCompetitor.team.abbreviation,
+          spread: spread.home.close.line,
+          odds: spread.home.close.odds,
+        },
+        awayTeam: {
+          name: awayCompetitor.team.shortDisplayName,
+          abbreviation: awayCompetitor.team.abbreviation,
+          spread: spread.away.close.line,
+          odds: spread.away.close.odds,
+        },
       });
     });
   });
