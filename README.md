@@ -1,6 +1,6 @@
 # Jimbo's NFL Pools
 
-Manages/tracks weekly spread pool results.
+Generates a single picks selection page for weekly submissions.
 
 ## Setup
 
@@ -47,8 +47,4 @@ To add data for a new week or year:
 
 ### URL Structure
 
-- Homepage: `/`
-- Week pages: `/week/{year}/{week}/`
-- Player profiles: `/players/{player-id}/`
-
-The site includes year and week selection dropdowns that allow easy navigation between different years and weeks.
+- Picks selection page: `/`
